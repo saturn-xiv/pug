@@ -1,0 +1,10 @@
+[package]
+name = "pug"
+version = "0.1.0"
+authors = ["Jeremy Zheng <jitang.zheng@gmail.com>"]
+description = "A web framework for rust."
+homepage = "https://github.com/saturn-xiv/put"
+license = "MIT"
+
+[dependencies]
+rocket = "0.4.0-rc.1"
