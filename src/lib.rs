@@ -20,7 +20,11 @@ pub extern crate sodiumoxide;
 pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
+pub extern crate clap;
+pub extern crate futures;
+pub extern crate hyper;
 pub extern crate jsonwebtoken;
+pub extern crate log4rs;
 pub extern crate serde;
 pub extern crate sha2;
 
@@ -33,6 +37,7 @@ pub mod http;
 pub mod i18n;
 pub mod jwt;
 pub mod orm;
+pub mod sys;
 
 #[cfg(feature = "redis")]
 pub mod redis;
