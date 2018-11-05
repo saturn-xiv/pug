@@ -14,10 +14,15 @@ pub extern crate serde_json;
 #[macro_use]
 pub extern crate log;
 
+#[cfg(feature = "sodium")]
+pub extern crate sodiumoxide;
+
+pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
 pub extern crate jsonwebtoken;
 pub extern crate serde;
+pub extern crate sha2;
 
 pub mod app;
 pub mod cache;
