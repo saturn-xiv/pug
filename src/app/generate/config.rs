@@ -1,0 +1,27 @@
+use std::fs;
+use std::io::Write;
+use std::os::unix::fs::OpenOptionsExt;
+use std::path::Path;
+
+use toml;
+
+use super::super::super::{env::Config, errors::Result};
+
+pub const NAME: &'static str = "generate:config";
+
+pub fn help<P: AsRef<Path>>(file: P) -> String {
+    format!("Generate {}", file.as_ref().display())
+}
+
+pub fn run<P: AsRef<Path>>(file: P) -> Result<()> {
+    let buf = toml::to_vec(&Config::default())?;
+
+    info!("generate file {}", file.as_ref().display());
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .mode(0o600)
+        .open(file)?;
+    file.write_all(&buf)?;
+    Ok(())
+}

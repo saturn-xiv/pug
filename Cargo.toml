@@ -19,8 +19,10 @@ sodium = ["sodiumoxide"]
 
 [dependencies]
 log = "0.4"
+env_logger = "0.5"
 log4rs = "0.8"
 error-chain = "0.12"
+lazy_static = "1.2"
 chrono = "0.4"
 chrono-tz = "0.5"
 serde = "1"
@@ -30,12 +32,14 @@ serde_json = "1"
 clap = "2.32"
 base64 = "0.10"
 sha2 = "0.8"
-sodiumoxide = {version="0.1.0", optional=true}
-hyper = "0.12"
-futures = "0.1" 
+toml = "0.4"
 rocket = "0.4.0-rc.1"
+
+[dependencies.sodiumoxide]
+version = "0.1.0"
+optional = true
 
 [dependencies.rocket_contrib]
 version = "0.4.0-rc.1"
 default-features = false
-features = []
+features = ["tera_templates"]

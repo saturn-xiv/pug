@@ -13,6 +13,8 @@ pub extern crate rocket_contrib;
 pub extern crate serde_json;
 #[macro_use]
 pub extern crate log;
+#[macro_use]
+pub extern crate lazy_static;
 
 #[cfg(feature = "sodium")]
 pub extern crate sodiumoxide;
@@ -21,12 +23,12 @@ pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
 pub extern crate clap;
-pub extern crate futures;
-pub extern crate hyper;
+pub extern crate env_logger;
 pub extern crate jsonwebtoken;
 pub extern crate log4rs;
 pub extern crate serde;
 pub extern crate sha2;
+pub extern crate toml;
 
 pub mod app;
 pub mod cache;

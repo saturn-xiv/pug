@@ -1,10 +1,12 @@
 pub mod generate;
 
+use env_logger;
 use log4rs;
+
 #[cfg(feature = "sodium")]
 use sodiumoxide;
 
-use clap::{App, Arg, SubCommand};
+use clap::App;
 
 pub fn new<'a, 'b>(
     name: &'a str,
@@ -14,7 +16,10 @@ pub fn new<'a, 'b>(
     banner: Option<&'a str>,
     homepage: Option<&'a str>,
 ) -> clap::App<'a, 'b> {
-    // log4rs::init_file("log4rs.yml", Default::default())?;
+    if let Err(e) = log4rs::init_file("log4rs.yml", Default::default()) {
+        env_logger::init();
+        error!("failed to parse log4rs.yml, {:?}", e);
+    }
     #[cfg(feature = "sodium")]
     {
         if let Err(_) = sodiumoxide::init() {
