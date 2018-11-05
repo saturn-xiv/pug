@@ -7,6 +7,12 @@ pub extern crate rocket;
 pub extern crate serde_derive;
 #[macro_use]
 pub extern crate error_chain;
+#[macro_use]
+pub extern crate rocket_contrib;
+#[macro_use]
+pub extern crate serde_json;
+#[macro_use]
+pub extern crate log;
 
 pub extern crate chrono;
 pub extern crate chrono_tz;
@@ -15,10 +21,13 @@ pub extern crate serde;
 
 pub mod app;
 pub mod cache;
-pub mod crypt;
+pub mod crypto;
 pub mod env;
 pub mod errors;
 pub mod http;
 pub mod i18n;
 pub mod jwt;
 pub mod orm;
+
+#[cfg(feature = "redis")]
+pub mod redis;
