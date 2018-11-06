@@ -32,6 +32,8 @@ pub use self::validator_derive::Validate;
 
 #[cfg(feature = "sodium")]
 pub extern crate sodiumoxide;
+#[cfg(feature = "zeromq")]
+pub extern crate zmq;
 
 pub extern crate base64;
 pub extern crate chrono;

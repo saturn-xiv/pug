@@ -14,7 +14,7 @@ mysql = ["rocket_contrib/diesel_mysql_pool"]
 sqlite = ["rocket_contrib/diesel_sqlite_pool"]
 redis = ["rocket_contrib/redis_pool"]
 rabbitmq = []
-zeromq = []
+zeromq = ["zmq"]
 sodium = ["sodiumoxide"]
 
 [dependencies]
@@ -39,6 +39,10 @@ xml-rs = "0.8"
 rand = "0.5"
 regex = "1"
 rocket = "0.4.0-rc.1"
+
+[dependencies.zmq]
+version = "0.8"
+optional = true
 
 # from https://github.com/SergioBenitez/Rocket/blob/v0.4/core/http/Cargo.toml
 [dependencies.hyper]
