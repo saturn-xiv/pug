@@ -3,7 +3,7 @@ use std::{fs, io::Read};
 
 use base64;
 use rocket::{
-    config::{Config as RocketConfig, Environment},
+    config::{Config as RocketConfig, Environment, LoggingLevel, Table, Value},
     custom as rocket_custom, Rocket,
 };
 use toml;
@@ -38,13 +38,13 @@ impl Default for Config {
             #[cfg(feature = "sodium")]
             secrets: base64::encode(&crypto::sodium::Encryptor::random(32)),
             #[cfg(feature = "redis")]
-            redis: "tcp://localhost:5432/0".to_string(),
+            redis: "redis://localhost:5432/0".to_string(),
             #[cfg(feature = "sqlite")]
             sqlite: "tmp/db".to_string(),
             #[cfg(feature = "mysql")]
-            mysql: "mysql://".to_string(),
+            mysql: "mysql://root:@localhost:3306/pug".to_string(),
             #[cfg(feature = "postgresql")]
-            postgresql: "postgres://".to_string(),
+            postgresql: "postgres://postgres:@localhost:5432/pug".to_string(),
             #[cfg(feature = "rabbitmq")]
             rabbitmq: "rabbitmq://".to_string(),
         }
@@ -80,37 +80,55 @@ impl Config {
         }
     }
 
+    fn database_url(&self, v: String) -> Value {
+        let mut it = Table::new();
+        it.insert("url".to_string(), Value::String(v));
+        Value::Table(it)
+    }
+
     pub fn rocket(&self) -> Result<Rocket> {
         let env = self.env();
-        let mut cfg = RocketConfig::build(env)
+
+        let mut databases = Table::new();
+        #[cfg(feature = "redis")]
+        {
+            databases.insert("redis".to_string(), self.database_url(self.redis.clone()));
+        }
+        #[cfg(feature = "sqlite")]
+        {
+            databases.insert("sqlite".to_string(), self.database_url(self.sqlite.clone()));
+        }
+        #[cfg(feature = "mysql")]
+        {
+            databases.insert("mysql".to_string(), self.database_url(self.mysql.clone()));
+        }
+        #[cfg(feature = "postgresql")]
+        {
+            databases.insert(
+                "postgresql".to_string(),
+                self.database_url(self.postgresql.clone()),
+            );
+        }
+
+        let cfg = RocketConfig::build(env)
             .address("0.0.0.0")
             .port(self.http.port)
             .workers(self.http.workers)
             .secret_key(self.secrets.clone())
             .keep_alive(self.http.keep_alive)
+            .log_level(if env.is_prod() {
+                LoggingLevel::Critical
+            } else {
+                LoggingLevel::Debug
+            })
             .extra("template_dir", format!("themes/{}/views", self.http.theme))
             .extra("assets_dir", format!("themes/{}/assets", self.http.theme))
+            .extra("databases", databases)
             .limits(
                 rocket::config::Limits::new()
                     .limit("forms", self.http.forms_limit * 1024)
                     .limit("json", self.http.json_limit * 1024),
             );
-        #[cfg(feature = "redis")]
-        {
-            cfg = cfg.extra("databases.redis", self.redis.clone());
-        }
-        #[cfg(feature = "sqlite")]
-        {
-            cfg = cfg.extra("databases.sqlite", self.sqlite.clone());
-        }
-        #[cfg(feature = "mysql")]
-        {
-            cfg = cfg.extra("databases.mysql", self.mysql.clone());
-        }
-        #[cfg(feature = "postgresql")]
-        {
-            cfg = cfg.extra("databases.postgresql", self.postgresql.clone());
-        }
 
         let mut app = rocket_custom(cfg.finalize()?);
         #[cfg(feature = "redis")]
