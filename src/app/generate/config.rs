@@ -3,9 +3,10 @@ use std::io::Write;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
+use serde::ser::Serialize;
 use toml;
 
-use super::super::super::{env::Config, errors::Result};
+use super::super::super::errors::Result;
 
 pub const NAME: &'static str = "generate:config";
 
@@ -13,8 +14,8 @@ pub fn help<P: AsRef<Path>>(file: P) -> String {
     format!("Generate {}", file.as_ref().display())
 }
 
-pub fn run<P: AsRef<Path>>(file: P) -> Result<()> {
-    let buf = toml::to_vec(&Config::default())?;
+pub fn run<P: AsRef<Path>, V: Serialize + Default>(file: P) -> Result<()> {
+    let buf = toml::to_vec(&V::default())?;
 
     info!("generate file {}", file.as_ref().display());
     let mut file = fs::OpenOptions::new()

@@ -6,12 +6,22 @@ use rocket::{
     config::{Config as RocketConfig, Environment, LoggingLevel, Table, Value},
     custom as rocket_custom, Rocket,
 };
+use serde::de::DeserializeOwned;
 use toml;
 
 use super::{
     crypto::{self, Encryptor},
     errors::Result,
 };
+
+pub fn parse<P: AsRef<Path>, T: DeserializeOwned>(file: P) -> Result<T> {
+    info!("load config from file {}", file.as_ref().display());
+    let mut file = fs::File::open(file)?;
+    let mut buf = Vec::new();
+    file.read_to_end(&mut buf)?;
+    let it = toml::from_slice(&buf)?;
+    Ok(it)
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
@@ -52,15 +62,6 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn new<P: AsRef<Path>>(file: P) -> Result<Self> {
-        info!("load config from file {}", file.as_ref().display());
-        let mut file = fs::File::open(file)?;
-        let mut buf = Vec::new();
-        file.read_to_end(&mut buf)?;
-        let cfg = toml::from_slice(&buf)?;
-        Ok(cfg)
-    }
-
     pub fn secrets(&self) -> Result<Vec<u8>> {
         let buf = base64::decode(&self.secrets)?;
         Ok(buf)

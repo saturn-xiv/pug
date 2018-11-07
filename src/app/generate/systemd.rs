@@ -9,57 +9,46 @@ use rocket_contrib::templates::tera::Tera;
 
 use super::super::super::errors::Result;
 
-pub const COMMAND_NAME: &'static str = "generate:nginx";
-pub const COMMAND_ABOUT: &'static str = "Generate nginx.conf";
-pub const ARG_HTTPS: &'static str = "https";
-pub const ARG_SERVER_NAME: &'static str = "server_name";
+pub const COMMAND_NAME: &'static str = "generate:systemd";
+pub const COMMAND_ABOUT: &'static str = "Generate systemd service.conf";
+pub const ARG_SERVICE_NAME: &'static str = "name";
 
 #[derive(Serialize)]
 struct Config {
     name: String,
-    port: u16,
-    ssl: bool,
     root: String,
+    description: String,
 }
 
 pub fn command<'a, 'b>() -> App<'a, 'b> {
     SubCommand::with_name(COMMAND_NAME)
         .about(COMMAND_ABOUT)
         .arg(
-            clap::Arg::with_name(ARG_HTTPS)
-                .short("s")
-                .long("ssl")
-                .value_name("HTTPS")
-                .help("Enable https?")
-                .takes_value(false),
-        )
-        .arg(
-            clap::Arg::with_name(ARG_SERVER_NAME)
+            clap::Arg::with_name(ARG_SERVICE_NAME)
                 .required(true)
                 .short("n")
                 .long("name")
-                .value_name("SERVER_NAME")
+                .value_name("SERVICE_NAME")
                 .help("HTTP server name")
                 .takes_value(true),
         )
 }
 
-pub fn run(name: String, port: u16, ssl: bool) -> Result<()> {
-    let tpl = "nginx.conf";
+pub fn run(name: String, description: String) -> Result<()> {
+    let tpl = "systemd.conf";
     let mut tera = Tera::default();
     let cur = current_dir()?;
-    tera.add_raw_template(tpl, include_str!("nginx.conf"))?;
+    tera.add_raw_template(tpl, include_str!("systemd.conf"))?;
     let buf = tera.render(
         tpl,
         &Config {
-            name: name,
-            port: port,
-            ssl: ssl,
+            name: name.clone(),
+            description: description,
             root: format!("{}", cur.display()),
         },
     )?;
 
-    let file = Path::new("tmp").join(tpl);
+    let file = Path::new("tmp").join(format!("{}.service", name));
     info!("generate file {}", file.display());
     let mut fd = fs::OpenOptions::new()
         .write(true)

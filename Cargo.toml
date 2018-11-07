@@ -11,7 +11,7 @@ default = ["postgresql", "mysql", "sqlite", "redis", "rabbitmq", "sodium", "zero
 
 postgresql = ["rocket_contrib/diesel_postgres_pool"]
 mysql = ["rocket_contrib/diesel_mysql_pool"]
-sqlite = ["rocket_contrib/diesel_sqlite_pool"]
+sqlite = ["rocket_contrib/diesel_sqlite_pool", "diesel/chrono"]
 redis = ["rocket_contrib/redis_pool"]
 rabbitmq = []
 zeromq = ["zmq"]
@@ -65,3 +65,7 @@ optional = true
 version = "0.4.0-rc.1"
 default-features = false
 features = ["tera_templates"]
+
+[dependencies.diesel]
+version = "1.3"
+features = ["chrono", "serde_json", "uuid", "network-address", "numeric", "r2d2"]
