@@ -61,6 +61,7 @@ pub mod http;
 pub mod i18n;
 pub mod jwt;
 pub mod orm;
+pub mod queue;
 pub mod sys;
 
 #[cfg(feature = "redis")]

@@ -7,11 +7,13 @@ pub struct Subscriber {
 }
 
 impl Subscriber {
-    pub fn new(url: &String, channel: &String) -> Result<Self> {
+    pub fn new(url: &String, channels: Vec<String>) -> Result<Self> {
         let c = zmq::Context::new();
         let s = c.socket(zmq::SUB)?;
         s.connect(url)?;
-        s.set_subscribe(channel.as_bytes())?;
+        for it in channels {
+            s.set_subscribe(it.as_bytes())?;
+        }
         Ok(Self { socket: s })
     }
     pub fn start<F>(&self, f: F)
@@ -26,7 +28,7 @@ impl Subscriber {
         };
         loop {
             if let Err(e) = run() {
-                error!("{:?}", e);
+                error!("fail on process: {:?}", e);
             }
         }
     }

@@ -19,7 +19,8 @@ error_chain!{
         XmlReader(xml::reader::Error);
         SerdeXmlRs(serde_xml_rs::Error);
 
-        RedisError(rocket_contrib::databases::redis::RedisError) #[cfg(feature = "redis")];
+        ZeroMq(zmq::Error) #[cfg(feature = "zeromq")];
+        Redis(rocket_contrib::databases::redis::RedisError) #[cfg(feature = "redis")];
     }
 
 }
