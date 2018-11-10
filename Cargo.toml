@@ -39,6 +39,9 @@ xml-rs = "0.8"
 encoding_rs = "0.8"
 rand = "0.5"
 regex = "1"
+libc = "0.2"
+oping = "0.3"
+reqwest = "0.9"
 rocket = "0.4.0-rc.1"
 
 [dependencies.zmq]
