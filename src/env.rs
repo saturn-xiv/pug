@@ -1,27 +1,13 @@
-use std::path::Path;
-use std::{fs, io::Read};
-
 use base64;
 use rocket::{
     config::{Config as RocketConfig, Environment, LoggingLevel, Table, Value},
     custom as rocket_custom, Rocket,
 };
-use serde::de::DeserializeOwned;
-use toml;
 
 use super::{
     crypto::{self, Encryptor},
     errors::Result,
 };
-
-pub fn parse<P: AsRef<Path>, T: DeserializeOwned>(file: P) -> Result<T> {
-    info!("load config from file {}", file.as_ref().display());
-    let mut file = fs::File::open(file)?;
-    let mut buf = Vec::new();
-    file.read_to_end(&mut buf)?;
-    let it = toml::from_slice(&buf)?;
-    Ok(it)
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {

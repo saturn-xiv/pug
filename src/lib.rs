@@ -39,6 +39,7 @@ pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
 pub extern crate clap;
+pub extern crate encoding_rs;
 pub extern crate env_logger;
 pub extern crate jsonwebtoken;
 pub extern crate log4rs;
@@ -61,6 +62,7 @@ pub mod http;
 pub mod i18n;
 pub mod jwt;
 pub mod orm;
+pub mod parser;
 pub mod queue;
 pub mod sys;
 
