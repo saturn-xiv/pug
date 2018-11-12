@@ -50,6 +50,7 @@ features = ["vendored"]
 
 [dependencies.zmq]
 version = "0.8"
+default-features = false
 optional = true
 
 # from https://github.com/SergioBenitez/Rocket/blob/v0.4/core/http/Cargo.toml
