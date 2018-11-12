@@ -44,6 +44,10 @@ oping = "0.3"
 reqwest = "0.9"
 rocket = "0.4.0-rc.1"
 
+[dependencies.openssl-sys]
+version = "*"
+features = ["vendored"]
+
 [dependencies.zmq]
 version = "0.8"
 optional = true
