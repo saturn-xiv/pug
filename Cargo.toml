@@ -15,14 +15,14 @@ sqlite = ["rocket_contrib/diesel_sqlite_pool", "diesel/chrono"]
 redis = ["rocket_contrib/redis_pool"]
 rabbitmq = []
 zeromq = ["zmq"]
-sodium = ["sodiumoxide"]
+sodium = ["rust_sodium"]
 
 [dependencies]
 log = "0.4"
 env_logger = "0.5"
 log4rs = "0.8"
 error-chain = "0.12"
-lazy_static = "1.2"
+lazy_static = "1.0"
 chrono-tz = "0.5"
 serde = "1"
 serde_derive = "1"
@@ -50,7 +50,6 @@ features = ["vendored"]
 
 [dependencies.zmq]
 version = "0.8"
-default-features = false
 optional = true
 
 # from https://github.com/SergioBenitez/Rocket/blob/v0.4/core/http/Cargo.toml
@@ -66,8 +65,8 @@ features = ["serde"]
 version = "1.7"
 features=["query_encoding"]
 
-[dependencies.sodiumoxide]
-version = "0.1.0"
+[dependencies.rust_sodium]
+version = "0.10"
 optional = true
 
 [dependencies.rocket_contrib]

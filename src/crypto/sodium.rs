@@ -1,9 +1,9 @@
-use serde::{de::DeserializeOwned, ser::Serialize};
-use serde_json;
-use sodiumoxide::{
+use rust_sodium::{
     crypto::{pwhash, secretbox},
     randombytes,
 };
+use serde::{de::DeserializeOwned, ser::Serialize};
+use serde_json;
 
 use super::super::errors::Result;
 

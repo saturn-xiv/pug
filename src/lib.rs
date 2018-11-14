@@ -31,7 +31,7 @@ pub use self::serde_derive::{Deserialize, Serialize};
 pub use self::validator_derive::Validate;
 
 #[cfg(feature = "sodium")]
-pub extern crate sodiumoxide;
+pub extern crate rust_sodium;
 #[cfg(feature = "zeromq")]
 pub extern crate zmq;
 

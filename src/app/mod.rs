@@ -4,7 +4,7 @@ use env_logger;
 use log4rs;
 
 #[cfg(feature = "sodium")]
-use sodiumoxide;
+use rust_sodium;
 
 use clap::App;
 
@@ -22,7 +22,7 @@ pub fn new<'a, 'b>(
     }
     #[cfg(feature = "sodium")]
     {
-        if let Err(_) = sodiumoxide::init() {
+        if let Err(_) = rust_sodium::init() {
             error!("sodium init");
         }
     }
