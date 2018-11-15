@@ -5,19 +5,19 @@ use serde::de::DeserializeOwned;
 use serde::ser::Serialize;
 use serde_json;
 
-use super::super::{crypto::Encryptor, errors::Result, orm::sqlite::DieselConnection};
+use super::super::super::{crypto::Encryptor, errors::Result, orm::DieselConnection};
 
 pub const UP: &'static str = include_str!("up.sql");
 pub const DOWN: &'static str = include_str!("down.sql");
 
 table! {
     settings (id) {
-        id -> Integer,
-        key -> Text,
-        value -> Binary,
-        salt -> Nullable<Binary>,
-        updated_at -> Timestamp,
+        id -> Int8,
+        key -> Varchar,
+        value -> Bytea,
+        salt -> Nullable<Bytea>,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 

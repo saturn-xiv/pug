@@ -66,10 +66,10 @@ pub mod errors;
 pub mod http;
 pub mod i18n;
 pub mod jwt;
+pub mod nut;
 pub mod orm;
 pub mod parser;
 pub mod queue;
-pub mod settings;
 pub mod sys;
 
 #[cfg(feature = "redis")]

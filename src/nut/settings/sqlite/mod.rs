@@ -5,19 +5,19 @@ use serde::de::DeserializeOwned;
 use serde::ser::Serialize;
 use serde_json;
 
-use super::super::{crypto::Encryptor, errors::Result, orm::postgresql::DieselConnection};
+use super::super::super::{crypto::Encryptor, errors::Result, orm::DieselConnection};
 
 pub const UP: &'static str = include_str!("up.sql");
 pub const DOWN: &'static str = include_str!("down.sql");
 
 table! {
     settings (id) {
-        id -> Int8,
-        key -> Varchar,
-        value -> Bytea,
-        salt -> Nullable<Bytea>,
-        created_at -> Timestamp,
+        id -> Integer,
+        key -> Text,
+        value -> Binary,
+        salt -> Nullable<Binary>,
         updated_at -> Timestamp,
+        created_at -> Timestamp,
     }
 }
 
@@ -45,7 +45,7 @@ pub fn set<K: Serialize, V: Serialize, E: Encryptor>(
     k: &K,
     v: &V,
     f: bool,
-) -> Result<i64> {
+) -> Result<()> {
     let key = serde_json::to_string(k)?;
     let buf = serde_json::to_vec(v)?;
 
@@ -61,7 +61,7 @@ pub fn set<K: Serialize, V: Serialize, E: Encryptor>(
     match settings::dsl::settings
         .select(settings::dsl::id)
         .filter(settings::dsl::key.eq(&key))
-        .first::<i64>(db)
+        .first::<i32>(db)
     {
         Ok(id) => {
             let it = settings::dsl::settings.filter(settings::dsl::id.eq(&id));
@@ -72,17 +72,19 @@ pub fn set<K: Serialize, V: Serialize, E: Encryptor>(
                     settings::dsl::updated_at.eq(&now),
                 ))
                 .execute(db)?;
-            Ok(id)
+            Ok(())
         }
-        Err(_) => Ok(insert_into(settings::dsl::settings)
-            .values((
-                settings::dsl::key.eq(&key),
-                settings::dsl::value.eq(&val),
-                settings::dsl::salt.eq(&salt),
-                settings::dsl::updated_at.eq(&now),
-                settings::dsl::created_at.eq(&now),
-            ))
-            .returning(settings::dsl::id)
-            .get_result::<i64>(db)?),
+        Err(_) => {
+            insert_into(settings::dsl::settings)
+                .values((
+                    settings::dsl::key.eq(&key),
+                    settings::dsl::value.eq(&val),
+                    settings::dsl::salt.eq(&salt),
+                    settings::dsl::updated_at.eq(&now),
+                    settings::dsl::created_at.eq(&now),
+                ))
+                .execute(db)?;
+            Ok(())
+        }
     }
 }

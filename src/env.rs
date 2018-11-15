@@ -13,14 +13,9 @@ use super::{
 pub struct Config {
     pub env: String,
     pub secrets: String,
+    pub database: String,
     #[cfg(feature = "redis")]
     pub redis: String,
-    #[cfg(feature = "sqlite")]
-    pub sqlite: String,
-    #[cfg(feature = "mysql")]
-    pub mysql: String,
-    #[cfg(feature = "postgresql")]
-    pub postgresql: String,
     #[cfg(feature = "rabbitmq")]
     pub rabbitmq: String,
     pub http: Http,
@@ -36,11 +31,11 @@ impl Default for Config {
             #[cfg(feature = "redis")]
             redis: "redis://localhost:5432/0".to_string(),
             #[cfg(feature = "sqlite")]
-            sqlite: "tmp/db".to_string(),
+            database: "tmp/db".to_string(),
             #[cfg(feature = "mysql")]
-            mysql: "mysql://root:@localhost:3306/pug".to_string(),
+            database: "mysql://root:@localhost:3306/pug".to_string(),
             #[cfg(feature = "postgresql")]
-            postgresql: "postgres://postgres:@localhost:5432/pug".to_string(),
+            database: "postgres://postgres:@localhost:5432/pug".to_string(),
             #[cfg(feature = "rabbitmq")]
             rabbitmq: "rabbitmq://".to_string(),
         }
@@ -81,19 +76,11 @@ impl Config {
         {
             databases.insert("redis".to_string(), self.database_url(self.redis.clone()));
         }
-        #[cfg(feature = "sqlite")]
-        {
-            databases.insert("sqlite".to_string(), self.database_url(self.sqlite.clone()));
-        }
-        #[cfg(feature = "mysql")]
-        {
-            databases.insert("mysql".to_string(), self.database_url(self.mysql.clone()));
-        }
-        #[cfg(feature = "postgresql")]
+        #[cfg(any(feature = "mysql", feature = "sqlite", feature = "postgresql"))]
         {
             databases.insert(
-                "postgresql".to_string(),
-                self.database_url(self.postgresql.clone()),
+                "database".to_string(),
+                self.database_url(self.database.clone()),
             );
         }
 
@@ -122,18 +109,11 @@ impl Config {
         {
             app = app.attach(super::redis::Connection::fairing());
         }
-        #[cfg(feature = "sqlite")]
+        #[cfg(any(feature = "sqlite", feature = "mysql", feature = "postgresql"))]
         {
-            app = app.attach(super::orm::sqlite::Connection::fairing());
+            app = app.attach(super::orm::Connection::fairing());
         }
-        #[cfg(feature = "mysql")]
-        {
-            app = app.attach(super::orm::mysql::Connection::fairing());
-        }
-        #[cfg(feature = "postgresql")]
-        {
-            app = app.attach(super::orm::postgresql::Connection::fairing());
-        }
+
         Ok(app)
     }
 }

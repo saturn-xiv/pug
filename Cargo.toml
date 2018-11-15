@@ -7,7 +7,7 @@ homepage = "https://github.com/saturn-xiv/pug"
 license = "MIT"
 
 [features]
-default = ["postgresql", "mysql", "mysql", "redis", "rabbitmq", "sodium", "zeromq"]
+default = ["postgresql", "redis", "rabbitmq", "sodium", "zeromq"]
 
 postgresql = ["rocket_contrib/diesel_postgres_pool", "diesel/postgres"]
 mysql = ["rocket_contrib/diesel_mysql_pool", "diesel/mysql"]
@@ -79,6 +79,6 @@ version = "1.3"
 features = ["chrono", "serde_json", "uuid", "network-address", "numeric", "r2d2", "128-column-tables"]
 
 [dependencies.libsqlite3-sys]
-version = "0.10"
+version = "*"
 optional = true
 features = ["bundled"]
