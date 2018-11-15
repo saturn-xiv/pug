@@ -19,6 +19,8 @@ pub extern crate lazy_static;
 pub extern crate validator_derive;
 #[macro_use]
 pub extern crate hyper;
+#[macro_use]
+pub extern crate diesel;
 
 pub use self::error_chain::{
     error_chain, error_chain_processing, impl_error_chain_kind, impl_error_chain_processed,
@@ -67,6 +69,7 @@ pub mod jwt;
 pub mod orm;
 pub mod parser;
 pub mod queue;
+pub mod settings;
 pub mod sys;
 
 #[cfg(feature = "redis")]

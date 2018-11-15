@@ -4,5 +4,3 @@ pub mod mysql;
 pub mod postgresql;
 #[cfg(feature = "sqlite")]
 pub mod sqlite;
-
-pub mod schema;

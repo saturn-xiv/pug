@@ -1,11 +1,8 @@
+use super::super::errors::Result;
 use rust_sodium::{
     crypto::{pwhash, secretbox},
     randombytes,
 };
-use serde::{de::DeserializeOwned, ser::Serialize};
-use serde_json;
-
-use super::super::errors::Result;
 
 pub struct Encryptor {
     key: secretbox::Key,
@@ -41,20 +38,16 @@ impl super::Encryptor for Encryptor {
             None => false,
         }
     }
-    fn encrypt<V: Serialize>(&self, plain: &V) -> Result<(Vec<u8>, Vec<u8>)> {
-        let val = serde_json::to_vec(&plain)?;
+    fn encrypt(&self, plain: &[u8]) -> (Vec<u8>, Vec<u8>) {
         let nonce = secretbox::gen_nonce();
-        let cipher = secretbox::seal(val.as_slice(), &nonce, &self.key);
-        Ok((cipher, nonce[..].to_vec()))
+        let cipher = secretbox::seal(plain, &nonce, &self.key);
+        (cipher, nonce[..].to_vec())
     }
 
-    fn decrypt<V: DeserializeOwned>(&self, cipher: &[u8], nonce: &[u8]) -> Result<V> {
+    fn decrypt(&self, cipher: &[u8], nonce: &[u8]) -> Result<Vec<u8>> {
         match secretbox::Nonce::from_slice(nonce) {
             Some(nonce) => match secretbox::open(cipher, &nonce, &self.key) {
-                Ok(buf) => {
-                    let val = serde_json::from_slice(buf.as_slice())?;
-                    Ok(val)
-                }
+                Ok(buf) => Ok(buf),
                 Err(_) => Err("decrypt data failed".into()),
             },
             None => Err("bad nonce".into()),
