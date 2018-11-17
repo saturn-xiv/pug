@@ -47,7 +47,7 @@ pub extern crate url;
 pub extern crate validator;
 pub extern crate xml;
 
-// pub mod app;
+pub mod app;
 pub mod cache;
 pub mod crypto;
 pub mod env;
@@ -55,13 +55,14 @@ pub mod errors;
 pub mod http;
 pub mod i18n;
 pub mod jwt;
+pub mod parser;
+pub mod queue;
+pub mod sys;
+
 #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod nut;
 #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod orm;
-pub mod parser;
-pub mod queue;
-pub mod sys;
 
 pub use self::error_chain::{
     error_chain, error_chain_processing, impl_error_chain_kind, impl_error_chain_processed,

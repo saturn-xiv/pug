@@ -1,11 +1,10 @@
 use std::env::current_dir;
 use std::fs;
-use std::io::Write;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
 use clap::{App, SubCommand};
-use rocket_contrib::templates::tera::Tera;
+use mustache;
 
 use super::super::super::errors::Result;
 
@@ -35,18 +34,8 @@ pub fn command<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn run(name: String, description: String) -> Result<()> {
-    let tpl = "systemd.conf";
-    let mut tera = Tera::default();
+    let tpl = mustache::compile_str(include_str!("systemd.conf"))?;
     let cur = current_dir()?;
-    tera.add_raw_template(tpl, include_str!("systemd.conf"))?;
-    let buf = tera.render(
-        tpl,
-        &Config {
-            name: name.clone(),
-            description: description,
-            root: format!("{}", cur.display()),
-        },
-    )?;
 
     let file = Path::new("tmp").join(format!("{}.service", name));
     info!("generate file {}", file.display());
@@ -55,6 +44,13 @@ pub fn run(name: String, description: String) -> Result<()> {
         .create_new(true)
         .mode(0o644)
         .open(file)?;
-    fd.write_all(buf.as_bytes())?;
+    tpl.render(
+        &mut fd,
+        &Config {
+            name: name.clone(),
+            description: description,
+            root: format!("{}", cur.display()),
+        },
+    )?;
     Ok(())
 }
