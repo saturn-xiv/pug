@@ -19,9 +19,10 @@ error_chain!{
         Diesel(diesel::result::Error);
         Mustache(mustache::Error);
         R2d2(r2d2::Error);
+        UrlParse(url::ParseError);
 
         ZeroMq(zmq::Error) #[cfg(feature = "zeromq")];
-        Redis(redis::RedisError) #[cfg(feature = "redis")];
+        Redis(r2d2_redis::redis::RedisError) #[cfg(feature = "redis")];
     }
 
 }

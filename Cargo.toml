@@ -15,6 +15,7 @@ sqlite = ["diesel/sqlite", "libsqlite3-sys"]
 rabbitmq = []
 zeromq = ["zmq"]
 sodium = ["rust_sodium"]
+redis = ["r2d2_redis"]
 
 [dependencies]
 log = "0.4"
@@ -47,9 +48,13 @@ gotham = "0.3"
 mustache = "0.9"
 r2d2 = "0.8"
 
-[dependencies.redis]
-version = "0.9"
+[dependencies.r2d2_redis]
+version = "0.8"
 optional=true
+
+# [dependencies.redis]
+# version = "0.9"
+# optional=true
 
 [dependencies.openssl-sys]
 version = "*"

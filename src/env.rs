@@ -2,6 +2,11 @@ use std::fmt;
 use std::path::{Path, PathBuf};
 
 use base64;
+use r2d2;
+use url::Url;
+
+#[cfg(any(feature = "redis"))]
+use r2d2_redis;
 
 use super::{
     crypto::{self, Encryptor},
@@ -77,6 +82,21 @@ impl Config {
     pub fn secrets(&self) -> Result<Vec<u8>> {
         let buf = base64::decode(&self.secrets)?;
         Ok(buf)
+    }
+
+    #[cfg(feature = "redis")]
+    pub fn redis(&self) -> Result<r2d2::Pool<r2d2_redis::RedisConnectionManager>> {
+        let manager = r2d2_redis::RedisConnectionManager::new(Url::parse(&self.redis)?)?;
+        let pool = r2d2::Pool::builder().build(manager)?;
+        Ok(pool)
+    }
+
+    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+    pub fn database<S: Into<String>>(url: S) -> Result<super::orm::Pool> {
+        use diesel::r2d2::ConnectionManager;
+        let manager = ConnectionManager::<super::orm::Connection>::new(url);
+        let pool = super::orm::Pool::new(manager)?;
+        Ok(pool)
     }
 }
 

@@ -18,7 +18,7 @@ pub extern crate diesel;
 pub extern crate hyper;
 
 #[cfg(feature = "redis")]
-pub extern crate redis;
+pub extern crate r2d2_redis;
 #[cfg(feature = "sodium")]
 pub extern crate rust_sodium;
 #[cfg(feature = "zeromq")]

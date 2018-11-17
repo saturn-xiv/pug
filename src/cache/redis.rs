@@ -1,11 +1,11 @@
 use std::ops::Deref;
 
 use chrono::Duration;
-use redis::cmd;
+use r2d2_redis::redis::{cmd, Connection};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json;
 
-use super::super::{errors::Result, redis::Connection};
+use super::super::errors::Result;
 
 impl super::Cache for Connection {
     fn get<K, V, F>(&self, key: &String, ttl: Duration, fun: F) -> Result<V>
