@@ -35,6 +35,7 @@ pub extern crate libc;
 pub extern crate log4rs;
 pub extern crate mustache;
 pub extern crate oping;
+pub extern crate r2d2;
 pub extern crate rand;
 pub extern crate regex;
 pub extern crate reqwest;

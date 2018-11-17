@@ -1,4 +1,5 @@
 use std::fmt;
+use std::path::{Path, PathBuf};
 
 use base64;
 
@@ -77,75 +78,6 @@ impl Config {
         let buf = base64::decode(&self.secrets)?;
         Ok(buf)
     }
-
-    // pub fn env(&self) -> Environment {
-    //     match self.env.parse() {
-    //         Ok(v) => v,
-    //         Err(_) => {
-    //             warn!(
-    //                 "bad environment {:?}, using {:?} as default",
-    //                 self.env,
-    //                 Environment::Development
-    //             );
-    //             Environment::Development
-    //         }
-    //     }
-    // }
-    //
-    // fn database_url(&self, v: String) -> Value {
-    //     let mut it = Table::new();
-    //     it.insert("url".to_string(), Value::String(v));
-    //     Value::Table(it)
-    // }
-    //
-    // pub fn rocket(&self) -> Result<Rocket> {
-    //     let env = self.env();
-    //
-    //     let mut databases = Table::new();
-    //     #[cfg(feature = "redis")]
-    //     {
-    //         databases.insert("redis".to_string(), self.database_url(self.redis.clone()));
-    //     }
-    //     #[cfg(any(feature = "mysql", feature = "sqlite", feature = "postgresql"))]
-    //     {
-    //         databases.insert(
-    //             "database".to_string(),
-    //             self.database_url(self.database.clone()),
-    //         );
-    //     }
-    //
-    //     let cfg = RocketConfig::build(env)
-    //         .address("0.0.0.0")
-    //         .port(self.http.port)
-    //         .workers(self.http.workers)
-    //         .secret_key(self.secrets.clone())
-    //         .keep_alive(self.http.keep_alive)
-    //         .log_level(if env.is_prod() {
-    //             LoggingLevel::Critical
-    //         } else {
-    //             LoggingLevel::Debug
-    //         })
-    //         .extra("template_dir", format!("themes/{}/views", self.http.theme))
-    //         .extra("assets_dir", format!("themes/{}/assets", self.http.theme))
-    //         .extra("databases", databases)
-    //         .limits(
-    //             rocket::config::Limits::new()
-    //                 .limit("forms", self.http.forms_limit * 1024)
-    //                 .limit("json", self.http.json_limit * 1024),
-    //         );
-    //
-    //     let mut app = rocket_custom(cfg.finalize()?);
-    //     #[cfg(feature = "redis")]
-    //     {
-    //         app = app.attach(super::redis::Connection::fairing());
-    //     }
-    //     #[cfg(any(feature = "sqlite", feature = "mysql", feature = "postgresql"))]
-    //     {
-    //         app = app.attach(super::orm::Connection::fairing());
-    //     }
-    //
-    //     Ok(app)
-    // }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -160,5 +92,26 @@ impl Default for Http {
             port: 8080,
             theme: "bootstrap".to_string(),
         }
+    }
+}
+
+impl Http {
+    const THEMES: &'static str = "themes";
+
+    pub fn global(&self) -> PathBuf {
+        Path::new(Self::THEMES).join("global")
+    }
+    pub fn templates(&self) -> PathBuf {
+        Path::new(Self::THEMES)
+            .join(self.theme.clone())
+            .join("views")
+    }
+    pub fn assets(&self) -> PathBuf {
+        Path::new(Self::THEMES)
+            .join(self.theme.clone())
+            .join("assets")
+    }
+    pub fn third(&self) -> PathBuf {
+        Path::new("node_modules").to_path_buf()
     }
 }

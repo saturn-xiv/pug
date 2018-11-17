@@ -18,6 +18,7 @@ error_chain!{
         SerdeXmlRs(serde_xml_rs::Error);
         Diesel(diesel::result::Error);
         Mustache(mustache::Error);
+        R2d2(r2d2::Error);
 
         ZeroMq(zmq::Error) #[cfg(feature = "zeromq")];
         Redis(redis::RedisError) #[cfg(feature = "redis")];

@@ -45,6 +45,7 @@ reqwest = "0.9"
 hyper = "0.12"
 gotham = "0.3"
 mustache = "0.9"
+r2d2 = "0.8"
 
 [dependencies.redis]
 version = "0.9"
