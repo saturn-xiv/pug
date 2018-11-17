@@ -7,7 +7,7 @@ mod sqlite;
 
 use serde::{de::DeserializeOwned, ser::Serialize};
 
-use super::super::{crypto::Encryptor, errors::Result};
+use super::{crypto::Encryptor, errors::Result};
 
 #[cfg(feature = "mysql")]
 pub use self::mysql::*;

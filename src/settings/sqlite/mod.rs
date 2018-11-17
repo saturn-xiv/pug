@@ -3,19 +3,19 @@ use diesel::{insert_into, prelude::*, update};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json;
 
-use super::super::super::{crypto::Encryptor, errors::Result, orm::Connection};
+use super::super::{crypto::Encryptor, errors::Result, orm::Connection};
 
 pub const UP: &'static str = include_str!("up.sql");
 pub const DOWN: &'static str = include_str!("down.sql");
 
 table! {
     settings (id) {
-        id -> Bigint,
-        key -> Varchar,
-        value -> Blob,
-        salt -> Nullable<Blob>,
-        created_at -> Datetime,
-        updated_at -> Datetime,
+        id -> Integer,
+        key -> Text,
+        value -> Binary,
+        salt -> Nullable<Binary>,
+        updated_at -> Timestamp,
+        created_at -> Timestamp,
     }
 }
 
@@ -56,7 +56,7 @@ impl super::SettingDao for Connection {
         match settings::dsl::settings
             .select(settings::dsl::id)
             .filter(settings::dsl::key.eq(&key))
-            .first::<i64>(self)
+            .first::<i32>(self)
         {
             Ok(id) => {
                 let it = settings::dsl::settings.filter(settings::dsl::id.eq(&id));
@@ -80,7 +80,6 @@ impl super::SettingDao for Connection {
                     .execute(self)?;
             }
         };
-
         Ok(())
     }
 }

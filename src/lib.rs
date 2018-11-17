@@ -53,16 +53,19 @@ pub mod crypto;
 pub mod env;
 pub mod errors;
 pub mod http;
-pub mod i18n;
 pub mod jwt;
 pub mod parser;
 pub mod queue;
 pub mod sys;
 
 #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+pub mod i18n;
+#[cfg(any(feature = "postgresql"))]
 pub mod nut;
 #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod orm;
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+pub mod settings;
 
 pub use self::error_chain::{
     error_chain, error_chain_processing, impl_error_chain_kind, impl_error_chain_processed,

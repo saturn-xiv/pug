@@ -3,7 +3,7 @@ use diesel::{insert_into, prelude::*, update};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json;
 
-use super::super::super::{crypto::Encryptor, errors::Result, orm::Connection};
+use super::super::{crypto::Encryptor, errors::Result, orm::Connection};
 
 pub const UP: &'static str = include_str!("up.sql");
 pub const DOWN: &'static str = include_str!("down.sql");
