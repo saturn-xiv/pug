@@ -49,12 +49,14 @@ pub extern crate xml;
 // pub mod app;
 pub mod cache;
 pub mod crypto;
-// pub mod env;
+pub mod env;
 pub mod errors;
 pub mod http;
 pub mod i18n;
 pub mod jwt;
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod nut;
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod orm;
 pub mod parser;
 pub mod queue;
