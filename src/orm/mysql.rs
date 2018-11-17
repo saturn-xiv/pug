@@ -1,6 +1,3 @@
-use rocket_contrib::databases::diesel::MysqlConnection;
+use diesel::mysql::MysqlConnection;
 
-pub type DieselConnection = MysqlConnection;
-
-#[database("database")]
-pub struct Connection(DieselConnection);
+pub type Connection = MysqlConnection;

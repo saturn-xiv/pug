@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use chrono::Duration;
-use rocket_contrib::databases::redis::cmd;
+use redis::cmd;
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json;
 

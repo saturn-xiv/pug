@@ -1,6 +1,3 @@
-use rocket_contrib::databases::diesel::PgConnection;
+use diesel::pg::PgConnection;
 
-pub type DieselConnection = PgConnection;
-
-#[database("database")]
-pub struct Connection(DieselConnection);
+pub type Connection = PgConnection;

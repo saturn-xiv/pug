@@ -9,10 +9,9 @@ license = "MIT"
 [features]
 default = ["postgresql", "redis", "rabbitmq", "sodium", "zeromq"]
 
-postgresql = ["rocket_contrib/diesel_postgres_pool", "diesel/postgres"]
-mysql = ["rocket_contrib/diesel_mysql_pool", "diesel/mysql"]
-sqlite = ["rocket_contrib/diesel_sqlite_pool", "diesel/sqlite", "libsqlite3-sys"]
-redis = ["rocket_contrib/redis_pool"]
+postgresql = ["diesel/postgres"]
+mysql = ["diesel/mysql"]
+sqlite = ["diesel/sqlite", "libsqlite3-sys"]
 rabbitmq = []
 zeromq = ["zmq"]
 sodium = ["rust_sodium"]
@@ -31,18 +30,25 @@ serde_json = "1"
 clap = "2.32"
 base64 = "0.10"
 sha2 = "0.8"
+rand = "0.6"
+ring = "0.13"
 toml = "0.4"
 validator = "0.8"
 validator_derive = "0.8"
 serde-xml-rs = "0.2"
 xml-rs = "0.8"
 encoding_rs = "0.8"
-rand = "0.5"
 regex = "1"
 libc = "0.2"
 oping = "0.3"
 reqwest = "0.9"
-rocket = "0.4.0-rc.1"
+hyper = "0.12"
+gotham = "0.3"
+mustache = "0.9"
+
+[dependencies.redis]
+version = "0.9"
+optional=true
 
 [dependencies.openssl-sys]
 version = "*"
@@ -51,11 +57,6 @@ features = ["vendored"]
 [dependencies.zmq]
 version = "0.8"
 optional = true
-
-# from https://github.com/SergioBenitez/Rocket/blob/v0.4/core/http/Cargo.toml
-[dependencies.hyper]
-version = "0.10.13"
-default-features = false
 
 [dependencies.chrono]
 version = "0.4"
@@ -68,11 +69,6 @@ features=["query_encoding"]
 [dependencies.rust_sodium]
 version = "0.10"
 optional = true
-
-[dependencies.rocket_contrib]
-version = "0.4.0-rc.1"
-default-features = false
-features = ["tera_templates"]
 
 [dependencies.diesel]
 version = "1.3"

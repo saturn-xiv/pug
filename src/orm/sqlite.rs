@@ -1,6 +1,3 @@
-use rocket_contrib::databases::diesel::SqliteConnection;
+use diesel::sqlite::SqliteConnection;
 
-pub type DieselConnection = SqliteConnection;
-
-#[database("database")]
-pub struct Connection(DieselConnection);
+pub type Connection = SqliteConnection;
