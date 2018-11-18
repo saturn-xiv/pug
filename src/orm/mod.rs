@@ -5,6 +5,7 @@ mod postgresql;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 
+pub mod middleware;
 pub mod schema;
 
 use diesel::r2d2::{
@@ -20,3 +21,4 @@ pub use self::sqlite::*;
 
 pub type Pool = DieselPool<ConnectionManager<Connection>>;
 pub type PooledConnection = DieselPooledConnection<ConnectionManager<Connection>>;
+pub type Middleware = middleware::Diesel<Connection>;
