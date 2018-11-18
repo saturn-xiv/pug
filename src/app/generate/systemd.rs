@@ -34,7 +34,7 @@ pub fn command<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn run(name: String, description: String) -> Result<()> {
-    let tpl = mustache::compile_str(include_str!("systemd.conf"))?;
+    let tpl = mustache::compile_str(include_str!("systemd.conf.mu"))?;
     let cur = current_dir()?;
 
     let file = Path::new("tmp").join(format!("{}.service", name));

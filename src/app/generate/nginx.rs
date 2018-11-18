@@ -44,7 +44,7 @@ pub fn command<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn run(name: String, port: u16, ssl: bool) -> Result<()> {
-    let tpl = mustache::compile_str(include_str!("nginx.conf"))?;
+    let tpl = mustache::compile_str(include_str!("nginx.conf.mu"))?;
     let cur = current_dir()?;
 
     let file = Path::new("tmp").join("nginx.conf");
