@@ -1,4 +1,5 @@
 pub mod generate;
+pub mod http;
 
 use env_logger;
 use log4rs;

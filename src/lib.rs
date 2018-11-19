@@ -16,6 +16,8 @@ pub extern crate validator_derive;
 pub extern crate diesel;
 #[macro_use]
 pub extern crate hyper;
+#[macro_use]
+pub extern crate askama;
 
 #[cfg(feature = "redis")]
 pub extern crate r2d2_redis;
@@ -23,9 +25,9 @@ pub extern crate r2d2_redis;
 pub extern crate rust_sodium;
 #[cfg(feature = "zeromq")]
 pub extern crate zmq;
-#[macro_use]
-pub extern crate gotham_derive;
 
+pub extern crate actix;
+pub extern crate actix_web;
 pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
@@ -34,7 +36,6 @@ pub extern crate cookie;
 pub extern crate encoding_rs;
 pub extern crate env_logger;
 pub extern crate futures;
-pub extern crate gotham;
 pub extern crate jsonwebtoken;
 pub extern crate language_tags;
 pub extern crate libc;
