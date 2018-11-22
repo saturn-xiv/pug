@@ -50,6 +50,9 @@ pub extern crate reqwest;
 pub extern crate serde;
 pub extern crate serde_xml_rs;
 pub extern crate sha2;
+pub extern crate tokio;
+pub extern crate tokio_codec;
+pub extern crate tokio_io;
 pub extern crate toml;
 pub extern crate url;
 pub extern crate validator;
@@ -66,13 +69,25 @@ pub mod parser;
 pub mod queue;
 pub mod sys;
 
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+#[cfg(any(
+    feature = "postgresql",
+    feature = "mysql",
+    feature = "sqlite"
+))]
 pub mod i18n;
 #[cfg(any(feature = "postgresql"))]
 pub mod nut;
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+#[cfg(any(
+    feature = "postgresql",
+    feature = "mysql",
+    feature = "sqlite"
+))]
 pub mod orm;
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+#[cfg(any(
+    feature = "postgresql",
+    feature = "mysql",
+    feature = "sqlite"
+))]
 pub mod settings;
 
 pub use self::error_chain::{
