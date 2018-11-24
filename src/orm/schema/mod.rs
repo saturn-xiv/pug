@@ -37,7 +37,7 @@ impl fmt::Display for Item {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{:16} {:16} {}",
+            "{:23} {:32} {}",
             self.version,
             self.name,
             match self.run_at {
@@ -107,8 +107,8 @@ impl Migration for Connection {
         for it in self.versions()? {
             info!("find migration {}", it);
             if let Some(_) = it.run_at {
-                info!("rollback {}", it.up);
-                self.batch_execute(&it.up)?;
+                info!("rollback {}", it.down);
+                self.batch_execute(&it.down)?;
                 delete(
                     schema_migrations::dsl::schema_migrations
                         .filter(schema_migrations::dsl::id.eq(it.id)),

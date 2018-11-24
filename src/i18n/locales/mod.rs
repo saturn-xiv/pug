@@ -15,7 +15,19 @@ pub use self::postgresql::*;
 #[cfg(feature = "sqlite")]
 pub use self::sqlite::*;
 
-use super::super::{errors::Result, orm::Connection};
+use super::super::{
+    errors::Result,
+    orm::{schema::New as Schema, Connection},
+};
+
+pub fn migration<'a>() -> Schema<'a> {
+    Schema {
+        version: "20181123203749148443617",
+        name: "create-locales",
+        up: UP,
+        down: DOWN,
+    }
+}
 
 #[derive(Queryable, Serialize)]
 pub struct Item {

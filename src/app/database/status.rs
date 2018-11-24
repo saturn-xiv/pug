@@ -12,7 +12,7 @@ pub fn command<'a, 'b>() -> App<'a, 'b> {
 }
 
 pub fn run(db: &Connection) -> Result<()> {
-    println!("{:16} {:16} {}", "NAME", "VERSION", "RUN ON");
+    println!("{:23} {:32} {}", "NAME", "VERSION", "RUN ON");
     for it in db.versions()? {
         println!("{}", it);
     }

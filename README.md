@@ -10,6 +10,12 @@ Pug is a web-application framework that includes everything needed to create dat
 openssl rand -base64 32
 ```
 
+-   Current timestamp
+
+```bash
+date +%Y%m%d%H%M%S%N
+```
+
 ## Resources
 
 -   [favicon.ico](http://icoconvert.com/)

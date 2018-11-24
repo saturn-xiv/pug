@@ -10,7 +10,11 @@ use diesel::{insert_into, prelude::*, update};
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json;
 
-use super::{crypto::Encryptor, errors::Result, orm::Connection};
+use super::{
+    crypto::Encryptor,
+    errors::Result,
+    orm::{schema::New as Schema, Connection},
+};
 
 #[cfg(feature = "mysql")]
 pub use self::mysql::*;
@@ -18,6 +22,15 @@ pub use self::mysql::*;
 pub use self::postgresql::*;
 #[cfg(feature = "sqlite")]
 pub use self::sqlite::*;
+
+pub fn migration<'a>() -> Schema<'a> {
+    Schema {
+        version: "20181123203833948693021",
+        name: "create-settings",
+        up: UP,
+        down: DOWN,
+    }
+}
 
 #[derive(Queryable)]
 pub struct Item {

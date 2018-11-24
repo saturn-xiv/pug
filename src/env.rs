@@ -48,7 +48,11 @@ pub struct Config {
     pub env: Environment,
     #[cfg(any(feature = "sodium"))]
     pub secrets: String,
-    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+    #[cfg(any(
+        feature = "postgresql",
+        feature = "mysql",
+        feature = "sqlite"
+    ))]
     pub database: String,
     #[cfg(feature = "redis")]
     pub redis: String,
@@ -92,10 +96,14 @@ impl Config {
         Ok(pool)
     }
 
-    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
-    pub fn database<S: Into<String>>(url: S) -> Result<super::orm::Pool> {
+    #[cfg(any(
+        feature = "postgresql",
+        feature = "mysql",
+        feature = "sqlite"
+    ))]
+    pub fn database(&self) -> Result<super::orm::Pool> {
         use diesel::r2d2::ConnectionManager;
-        let manager = ConnectionManager::<super::orm::Connection>::new(url);
+        let manager = ConnectionManager::<super::orm::Connection>::new(&self.database[..]);
         let pool = super::orm::Pool::new(manager)?;
         Ok(pool)
     }
