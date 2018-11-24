@@ -13,6 +13,8 @@ use super::{
     errors::Result,
 };
 
+pub const VERSION: &'static str = env!("PUG_VERSION");
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Environment {

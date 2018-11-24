@@ -76,7 +76,11 @@ pub mod sys;
     feature = "sqlite"
 ))]
 pub mod i18n;
-#[cfg(any(feature = "postgresql"))]
+#[cfg(any(
+    feature = "postgresql",
+    feature = "mysql",
+    feature = "sqlite"
+))]
 pub mod nut;
 #[cfg(any(
     feature = "postgresql",

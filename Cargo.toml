@@ -5,6 +5,7 @@ authors = ["Jeremy Zheng <jitang.zheng@gmail.com>"]
 description = "A web framework for rust."
 homepage = "https://github.com/saturn-xiv/pug"
 license = "MIT"
+build = "build.rs"
 
 [features]
 default = ["postgresql", "redis", "rabbitmq", "sodium", "zeromq"]
@@ -89,3 +90,6 @@ features = ["chrono", "serde_json", "uuid", "network-address", "numeric", "r2d2"
 version = "*"
 optional = true
 features = ["bundled"]
+
+[build-dependencies]
+askama = "0.7"
