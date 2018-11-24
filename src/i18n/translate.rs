@@ -5,7 +5,7 @@ use super::super::{
     errors::{Error, Result},
     orm::Connection,
 };
-use super::locales::LocaleDao;
+use super::locales::Dao;
 
 pub trait Translate {
     fn tr<S: Serialize>(&self, lang: &String, code: &String, args: &Option<S>) -> Result<String>;

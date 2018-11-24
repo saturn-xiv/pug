@@ -5,7 +5,8 @@ mod postgresql;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
+use diesel::{insert_into, prelude::*, update};
 
 #[cfg(feature = "mysql")]
 pub use self::mysql::*;
@@ -14,10 +15,13 @@ pub use self::postgresql::*;
 #[cfg(feature = "sqlite")]
 pub use self::sqlite::*;
 
-use super::super::errors::Result;
+use super::super::{errors::Result, orm::Connection};
 
 #[derive(Queryable, Serialize)]
-pub struct Locale {
+pub struct Item {
+    #[cfg(feature = "sqlite")]
+    pub id: i32,
+    #[cfg(any(feature = "postgresql", feature = "mysql"))]
     pub id: i64,
     pub lang: String,
     pub code: String,
@@ -26,8 +30,61 @@ pub struct Locale {
     pub updated_at: NaiveDateTime,
 }
 
-pub trait LocaleDao {
+#[derive(Insertable)]
+#[table_name = "locales"]
+pub struct New<'a> {
+    pub lang: &'a str,
+    pub code: &'a str,
+    pub message: &'a str,
+    pub updated_at: &'a NaiveDateTime,
+}
+
+pub trait Dao {
     fn languages(&self) -> Result<Vec<String>>;
     fn get(&self, lang: &String, code: &String) -> Result<String>;
     fn set(&self, lang: &String, code: &String, message: &String) -> Result<()>;
+}
+
+impl Dao for Connection {
+    fn languages(&self) -> Result<Vec<String>> {
+        Ok(locales::dsl::locales
+            .select(locales::dsl::lang)
+            .distinct()
+            .load::<String>(self)?)
+    }
+
+    fn get(&self, lang: &String, code: &String) -> Result<String> {
+        let it = locales::dsl::locales
+            .filter(locales::dsl::lang.eq(lang))
+            .filter(locales::dsl::code.eq(code))
+            .first::<Item>(self)?;
+        Ok(it.message)
+    }
+    fn set(&self, lang: &String, code: &String, message: &String) -> Result<()> {
+        let now = Utc::now().naive_utc();
+        match locales::dsl::locales
+            .filter(locales::dsl::lang.eq(lang))
+            .filter(locales::dsl::code.eq(code))
+            .first::<Item>(self)
+        {
+            Ok(it) => {
+                let it = locales::dsl::locales.filter(locales::dsl::id.eq(&it.id));
+                update(it)
+                    .set((
+                        locales::dsl::message.eq(message),
+                        locales::dsl::updated_at.eq(&now),
+                    )).execute(self)?;
+            }
+            Err(_) => {
+                insert_into(locales::dsl::locales)
+                    .values(&New {
+                        lang: lang,
+                        code: code,
+                        message: message,
+                        updated_at: &now,
+                    }).execute(self)?;
+            }
+        }
+        Ok(())
+    }
 }

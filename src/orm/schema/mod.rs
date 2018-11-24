@@ -50,28 +50,28 @@ impl fmt::Display for Item {
 
 #[derive(Insertable)]
 #[table_name = "schema_migrations"]
-pub struct NewItem<'a> {
+pub struct New<'a> {
     pub version: &'a str,
     pub name: &'a str,
     pub up: &'a str,
     pub down: &'a str,
 }
 
-impl<'a> fmt::Display for NewItem<'a> {
+impl<'a> fmt::Display for New<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}-{}", self.version, self.name)
     }
 }
 
 pub trait Migration {
-    fn check(&self, items: &Vec<NewItem>) -> Result<()>;
+    fn check(&self, items: &Vec<New>) -> Result<()>;
     fn migrate(&self) -> Result<()>;
     fn rollback(&self) -> Result<()>;
     fn versions(&self) -> Result<Vec<Item>>;
 }
 
 impl Migration for Connection {
-    fn check(&self, items: &Vec<NewItem>) -> Result<()> {
+    fn check(&self, items: &Vec<New>) -> Result<()> {
         self.batch_execute(UP)?;
         for it in items {
             let c: i64 = schema_migrations::dsl::schema_migrations

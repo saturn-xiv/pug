@@ -34,7 +34,7 @@ pub struct Item {
 
 #[derive(Insertable)]
 #[table_name = "settings"]
-pub struct NewItem<'a> {
+pub struct New<'a> {
     pub key: &'a str,
     pub value: &'a [u8],
     pub salt: Option<&'a [u8]>,
@@ -100,7 +100,7 @@ impl Dao for Connection {
             }
             Err(_) => {
                 insert_into(settings::dsl::settings)
-                    .values(&NewItem {
+                    .values(&New {
                         key: &key,
                         value: &val,
                         salt: match salt {
