@@ -8,13 +8,13 @@ use serde_json;
 use super::super::errors::Result;
 
 impl super::Cache for Connection {
-    fn get<K, V, F>(&self, key: &String, ttl: Duration, fun: F) -> Result<V>
+    fn get<K, V, F>(&self, key: &K, ttl: Duration, fun: F) -> Result<V>
     where
         F: FnOnce() -> Result<V>,
         K: Serialize,
         V: DeserializeOwned + Serialize,
     {
-        let key = format!("cache://{}", key);
+        let key = format!("cache://{}", serde_json::to_string(key)?);
         let db = self.deref();
         match cmd("get").arg(&key).query::<Vec<u8>>(db) {
             Ok(buf) => {
