@@ -27,5 +27,6 @@ pub struct Item {
 pub trait Migration {
     fn up(&self, version: &String, name: &String, script: &String) -> Result<()>;
     fn down(&self, version: &String, name: &String, script: &String) -> Result<()>;
-    fn status(&self) -> Result<Vec<(String, String, Option<NaiveDateTime>)>>;
+    fn status(&self) -> Result<Vec<(String, String, NaiveDateTime)>>;
+    fn exists(&self, version: &String, name: &String) -> Result<bool>;
 }
