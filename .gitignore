@@ -1,5 +1,9 @@
-# build
+# cargo
 /target/
 /Cargo.lock
+
+# nodejs
+/node_modules
+/package-lock.json
 
 /tmp/
