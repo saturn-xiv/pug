@@ -1,6 +1,13 @@
 pub mod generate;
 pub mod http;
 
+#[cfg(any(
+    feature = "postgresql",
+    feature = "mysql",
+    feature = "sqlite"
+))]
+pub mod database;
+
 use env_logger;
 use log4rs;
 

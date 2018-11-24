@@ -67,6 +67,7 @@ pub mod http;
 pub mod jwt;
 pub mod parser;
 pub mod queue;
+pub mod rfc;
 pub mod sys;
 
 #[cfg(any(
