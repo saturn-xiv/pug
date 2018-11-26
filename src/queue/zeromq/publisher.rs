@@ -4,22 +4,6 @@ use zmq;
 
 use super::super::super::errors::Result;
 
-// #[derive(Serialize, Deserialize, Debug, Clone)]
-// pub struct Config {
-//     pub host: Option<String>,
-//     pub port: u16,
-// }
-//
-// impl Config {
-//     pub fn url(&self) -> String {
-//         let host = match self.host {
-//             Some(v) => v,
-//             None => "*".to_string(),
-//         };
-//         format!("tcp://{}:{}", host, self.port)
-//     }
-// }
-
 pub struct Publisher {
     socket: Mutex<zmq::Socket>,
 }

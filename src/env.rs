@@ -13,7 +13,7 @@ use super::{
     errors::Result,
 };
 
-pub const VERSION: &'static str = env!("PUG_VERSION");
+pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "lowercase")]
