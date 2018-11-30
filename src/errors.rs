@@ -1,4 +1,4 @@
-error_chain!{
+error_chain! {
 
     foreign_links {
         StdIo(std::io::Error);
@@ -23,6 +23,7 @@ error_chain!{
         R2d2(r2d2::Error);
         UrlParse(url::ParseError);
         CookieParse(cookie::ParseError);
+        RocketConfig(rocket::config::ConfigError);
 
         ZeroMq(zmq::Error) #[cfg(feature = "zeromq")];
         Redis(r2d2_redis::redis::RedisError) #[cfg(feature = "redis")];

@@ -1,5 +1,8 @@
+#![feature(proc_macro_hygiene, decl_macro)]
 #![recursion_limit = "1024"]
 
+#[macro_use]
+pub extern crate rocket;
 #[macro_use]
 pub extern crate serde_derive;
 #[macro_use]
@@ -16,8 +19,9 @@ pub extern crate validator_derive;
 pub extern crate diesel;
 #[macro_use]
 pub extern crate hyper;
+
 #[macro_use]
-pub extern crate askama;
+extern crate rocket_contrib;
 
 #[cfg(feature = "redis")]
 pub extern crate r2d2_redis;
@@ -26,8 +30,6 @@ pub extern crate rust_sodium;
 #[cfg(feature = "zeromq")]
 pub extern crate zmq;
 
-pub extern crate actix;
-pub extern crate actix_web;
 pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
@@ -70,23 +72,13 @@ pub mod queue;
 pub mod rfc;
 pub mod sys;
 
-#[cfg(any(
-    feature = "postgresql",
-    feature = "mysql",
-    feature = "sqlite"
-))]
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod i18n;
-#[cfg(any(
-    feature = "postgresql",
-    feature = "mysql",
-    feature = "sqlite"
-))]
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod orm;
-#[cfg(any(
-    feature = "postgresql",
-    feature = "mysql",
-    feature = "sqlite"
-))]
+#[cfg(feature = "redis")]
+pub mod redis;
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod settings;
 
 pub use self::error_chain::{

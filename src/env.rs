@@ -1,8 +1,8 @@
-use std::fmt;
 use std::path::{Path, PathBuf};
 
 use base64;
 use r2d2;
+use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel};
 use url::Url;
 
 #[cfg(any(feature = "redis"))]
@@ -16,45 +16,11 @@ use super::{
 pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "lowercase")]
-pub enum Environment {
-    Production,
-    Staging,
-    Development,
-    Test,
-}
-
-impl fmt::Display for Environment {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Environment::Production => "production",
-                Environment::Staging => "staging",
-                Environment::Development => "development",
-                Environment::Test => "test",
-            }
-        )
-    }
-}
-
-impl Default for Environment {
-    fn default() -> Self {
-        Environment::Development
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
-    pub env: Environment,
+    pub env: String,
     #[cfg(any(feature = "sodium"))]
     pub secrets: String,
-    #[cfg(any(
-        feature = "postgresql",
-        feature = "mysql",
-        feature = "sqlite"
-    ))]
+    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
     pub database: String,
     #[cfg(feature = "redis")]
     pub redis: String,
@@ -66,7 +32,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            env: Environment::default(),
+            env: format!("{}", Environment::Development),
             http: Http::default(),
             #[cfg(feature = "sodium")]
             secrets: base64::encode(&crypto::sodium::Encryptor::random(32)),
@@ -85,6 +51,46 @@ impl Default for Config {
 }
 
 impl Config {
+    pub fn env(&self) -> Environment {
+        match self.env.parse() {
+            Ok(v) => v,
+            Err(_) => Environment::Development,
+        }
+    }
+
+    pub fn rocket(&self) -> Result<RocketConfig> {
+        let env = self.env();
+        let it = RocketConfig::build(env)
+            .address("0.0.0.0")
+            .workers(self.http.workers)
+            .port(self.http.port)
+            .secret_key(&self.secrets[..])
+            .keep_alive(match self.http.keep_alive {
+                Some(v) => v,
+                None => 0,
+            })
+            .limits(
+                Limits::new()
+                    .limit("forms", self.http.limits * (1 << 10 << 10))
+                    .limit("json", self.http.limits * (1 << 10 << 10)),
+            )
+            .extra(
+                "template_dir",
+                match self.http.templates().to_str() {
+                    Some(v) => v,
+                    None => "templates",
+                },
+            )
+            .extra("database", &self.database[..])
+            .log_level(match env {
+                Environment::Production => LoggingLevel::Normal,
+                _ => LoggingLevel::Debug,
+            })
+            .workers(12)
+            .finalize()?;
+        Ok(it)
+    }
+
     #[cfg(any(feature = "sodium"))]
     pub fn secrets(&self) -> Result<Vec<u8>> {
         let buf = base64::decode(&self.secrets)?;
@@ -98,11 +104,7 @@ impl Config {
         Ok(pool)
     }
 
-    #[cfg(any(
-        feature = "postgresql",
-        feature = "mysql",
-        feature = "sqlite"
-    ))]
+    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
     pub fn database(&self) -> Result<super::orm::Pool> {
         use diesel::r2d2::ConnectionManager;
         let manager = ConnectionManager::<super::orm::Connection>::new(&self.database[..]);
@@ -115,19 +117,29 @@ impl Config {
 pub struct Http {
     pub port: u16,
     pub theme: String,
+    pub workers: u16,
+    pub limits: u64,
+    pub keep_alive: Option<u32>,
 }
 
 impl Default for Http {
     fn default() -> Self {
         Self {
             port: 8080,
+            workers: 64,
             theme: "bootstrap".to_string(),
+            limits: 20,
+            keep_alive: Some(120),
         }
     }
 }
 
 impl Http {
     const THEMES: &'static str = "themes";
+
+    pub fn address(&self) -> String {
+        format!("0.0.0.0:{}", self.port)
+    }
 
     pub fn global(&self) -> PathBuf {
         Path::new(Self::THEMES).join("global")
