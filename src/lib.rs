@@ -81,12 +81,6 @@ pub mod i18n;
     feature = "mysql",
     feature = "sqlite"
 ))]
-pub mod nut;
-#[cfg(any(
-    feature = "postgresql",
-    feature = "mysql",
-    feature = "sqlite"
-))]
 pub mod orm;
 #[cfg(any(
     feature = "postgresql",
