@@ -75,6 +75,8 @@ pub mod sys;
 #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod i18n;
 #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+pub mod nut;
+#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
 pub mod orm;
 #[cfg(feature = "redis")]
 pub mod redis;

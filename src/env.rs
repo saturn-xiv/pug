@@ -60,11 +60,10 @@ impl Config {
 
     pub fn rocket(&self) -> Result<RocketConfig> {
         let env = self.env();
-        let it = RocketConfig::build(env)
+        let mut it = RocketConfig::build(env)
             .address("0.0.0.0")
             .workers(self.http.workers)
             .port(self.http.port)
-            .secret_key(&self.secrets[..])
             .keep_alive(match self.http.keep_alive {
                 Some(v) => v,
                 None => 0,
@@ -81,13 +80,22 @@ impl Config {
                     None => "templates",
                 },
             )
-            .extra("database", &self.database[..])
             .log_level(match env {
                 Environment::Production => LoggingLevel::Normal,
                 _ => LoggingLevel::Debug,
             })
-            .workers(12)
-            .finalize()?;
+            .workers(12);
+
+        #[cfg(any(feature = "sodium"))]
+        {
+            it = it.secret_key(&self.secrets[..]);
+        }
+        #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+        {
+            it = it.extra("database", &self.database[..]);
+        }
+
+        let it = it.finalize()?;
         Ok(it)
     }
 
