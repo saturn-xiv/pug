@@ -20,7 +20,8 @@ use super::{
 pub trait Server {
     type Config: Serialize + DeserializeOwned + Default + Into<Config>;
     type Error: From<Error>;
-    fn run(&self, &Self::Config) -> StdResult<(), Self::Error>;
+    fn launch(&self, &Self::Config) -> StdResult<(), Self::Error>;
+    fn migrations(&self) -> Vec<Migration>;
 }
 
 pub struct App<'a, 'b> {
@@ -61,15 +62,12 @@ impl<'a, 'b> App<'a, 'b> {
         Self { app: app }
     }
 
-    pub fn run<
+    pub fn launch<S, C, E>(self, server: &S) -> StdResult<(), E>
+    where
         S: Server<Config = C, Error = E>,
         C: Serialize + DeserializeOwned + Default + Into<Config>,
         E: From<Error>,
-    >(
-        self,
-        server: &S,
-        migrations: &Vec<Migration>,
-    ) -> StdResult<(), E> {
+    {
         let cfg = "config.toml";
         let meta = self.app.p.meta.clone();
         let matches = self
@@ -117,7 +115,7 @@ impl<'a, 'b> App<'a, 'b> {
 
         if let Some(_) = matches.subcommand_matches(database::migrate::COMMAND_NAME) {
             let db = open_database(cfg)?;
-            database::migrate::run(&db, migrations)?;
+            database::migrate::run(&db, &server.migrations())?;
             return Ok(());
         }
         if let Some(_) = matches.subcommand_matches(database::rollback::COMMAND_NAME) {
@@ -131,7 +129,7 @@ impl<'a, 'b> App<'a, 'b> {
             return Ok(());
         }
 
-        server.run(&cfg)?;
+        server.launch(&cfg)?;
         Ok(())
     }
 }
