@@ -23,13 +23,6 @@ pub extern crate hyper;
 #[macro_use]
 extern crate rocket_contrib;
 
-#[cfg(feature = "redis")]
-pub extern crate r2d2_redis;
-#[cfg(feature = "sodium")]
-pub extern crate rust_sodium;
-#[cfg(feature = "zeromq")]
-pub extern crate zmq;
-
 pub extern crate base64;
 pub extern crate chrono;
 pub extern crate chrono_tz;
@@ -46,12 +39,13 @@ pub extern crate mime;
 pub extern crate mustache;
 pub extern crate oping;
 pub extern crate r2d2;
+pub extern crate r2d2_redis;
 pub extern crate rand;
 pub extern crate regex;
 pub extern crate reqwest;
+pub extern crate rust_sodium;
 pub extern crate serde;
 pub extern crate serde_xml_rs;
-pub extern crate sha2;
 pub extern crate tokio;
 pub extern crate tokio_codec;
 pub extern crate tokio_io;
@@ -59,6 +53,7 @@ pub extern crate toml;
 pub extern crate url;
 pub extern crate validator;
 pub extern crate xml;
+pub extern crate zmq;
 
 pub mod app;
 pub mod cache;
@@ -72,7 +67,6 @@ pub mod nut;
 pub mod orm;
 pub mod parser;
 pub mod queue;
-#[cfg(feature = "redis")]
 pub mod redis;
 pub mod rfc;
 pub mod settings;

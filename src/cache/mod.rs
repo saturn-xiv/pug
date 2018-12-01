@@ -1,4 +1,3 @@
-#[cfg(feature = "redis")]
 pub mod redis;
 
 use chrono::Duration;

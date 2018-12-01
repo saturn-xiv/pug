@@ -25,8 +25,8 @@ error_chain! {
         CookieParse(cookie::ParseError);
         RocketConfig(rocket::config::ConfigError);
 
-        ZeroMq(zmq::Error) #[cfg(feature = "zeromq")];
-        Redis(r2d2_redis::redis::RedisError) #[cfg(feature = "redis")];
+        ZeroMq(zmq::Error);
+        Redis(r2d2_redis::redis::RedisError);
     }
 
 }

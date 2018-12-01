@@ -7,10 +7,8 @@ use std::result::Result as StdResult;
 use clap::{self, SubCommand};
 use env_logger;
 use log4rs;
-use serde::{de::DeserializeOwned, ser::Serialize};
-
-#[cfg(feature = "sodium")]
 use rust_sodium;
+use serde::{de::DeserializeOwned, ser::Serialize};
 
 use super::{
     env::Config,
@@ -42,12 +40,11 @@ impl<'a, 'b> App<'a, 'b> {
             env_logger::init();
             error!("failed to parse log4rs.yml, {:?}", e);
         }
-        #[cfg(feature = "sodium")]
-        {
-            if let Err(_) = rust_sodium::init() {
-                error!("sodium init");
-            }
+
+        if let Err(_) = rust_sodium::init() {
+            error!("sodium init");
         }
+
         let mut app = clap::App::new(name).version(version);
         if let Some(v) = author {
             app = app.author(v);

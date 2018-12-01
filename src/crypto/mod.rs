@@ -1,5 +1,7 @@
-#[cfg(feature = "sodium")]
+// https://github.com/RustCrypto/hashes
+
 pub mod sodium;
+pub mod ssha512;
 
 use super::errors::Result;
 

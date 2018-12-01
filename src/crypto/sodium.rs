@@ -1,8 +1,9 @@
-use super::super::errors::Result;
 use rust_sodium::{
     crypto::{pwhash, secretbox},
     randombytes,
 };
+
+use super::super::errors::Result;
 
 pub struct Encryptor {
     key: secretbox::Key,

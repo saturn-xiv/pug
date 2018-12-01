@@ -2,11 +2,8 @@ use std::path::{Path, PathBuf};
 
 use base64;
 use r2d2;
-use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel};
-use url::Url;
-
-#[cfg(feature = "redis")]
 use r2d2_redis;
+use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel};
 
 use super::{
     crypto::{self, Encryptor},
@@ -20,10 +17,8 @@ pub struct Config {
     pub env: String,
     pub secrets: String,
     pub database: String,
-    #[cfg(feature = "redis")]
-    pub redis: String,
-    #[cfg(feature = "rabbitmq")]
-    pub rabbitmq: String,
+    pub redis: Option<String>,
+    pub rabbitmq: Option<String>,
     pub http: Http,
 }
 
@@ -32,18 +27,15 @@ impl Default for Config {
         Self {
             env: format!("{}", Environment::Development),
             http: Http::default(),
-            #[cfg(feature = "sodium")]
             secrets: base64::encode(&crypto::sodium::Encryptor::random(32)),
-            #[cfg(feature = "redis")]
-            redis: "redis://localhost:5432/0".to_string(),
+            redis: Some("redis://localhost:5432/0".to_string()),
             #[cfg(feature = "sqlite")]
             database: "tmp/db".to_string(),
             #[cfg(feature = "mysql")]
             database: "mysql://root:@localhost:3306/pug".to_string(),
             #[cfg(feature = "postgresql")]
             database: "postgres://postgres:@localhost:5432/pug".to_string(),
-            #[cfg(feature = "rabbitmq")]
-            rabbitmq: "rabbitmq://".to_string(),
+            rabbitmq: Some("rabbitmq://".to_string()),
         }
     }
 }
@@ -95,11 +87,15 @@ impl Config {
         Ok(buf)
     }
 
-    #[cfg(feature = "redis")]
     pub fn redis(&self) -> Result<r2d2::Pool<r2d2_redis::RedisConnectionManager>> {
-        let manager = r2d2_redis::RedisConnectionManager::new(Url::parse(&self.redis)?)?;
-        let pool = r2d2::Pool::builder().build(manager)?;
-        Ok(pool)
+        match self.redis {
+            Some(ref v) => {
+                let manager = r2d2_redis::RedisConnectionManager::new(&v[..])?;
+                let pool = r2d2::Pool::builder().build(manager)?;
+                Ok(pool)
+            }
+            None => Err("please setup redis url".into()),
+        }
     }
 
     pub fn database(&self) -> Result<super::orm::Pool> {
