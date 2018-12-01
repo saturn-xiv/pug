@@ -5,7 +5,6 @@ pub mod http;
 use std::result::Result as StdResult;
 
 use clap::{self, SubCommand};
-use env_logger;
 use log4rs;
 use rust_sodium;
 use serde::{de::DeserializeOwned, ser::Serialize};
@@ -36,14 +35,10 @@ impl<'a, 'b> App<'a, 'b> {
         about: Option<&'a str>,
         banner: Option<&'a str>,
         homepage: Option<&'a str>,
-    ) -> Self {
-        if let Err(e) = log4rs::init_file("log4rs.yml", Default::default()) {
-            env_logger::init();
-            error!("failed to parse log4rs.yml, {:?}", e);
-        }
-
+    ) -> Result<Self> {
+        log4rs::init_file("log4rs.yml", Default::default())?;
         if let Err(_) = rust_sodium::init() {
-            error!("sodium init");
+            return Err("sodium init fail".into());
         }
 
         let mut app = clap::App::new(name).version(version);
@@ -59,7 +54,7 @@ impl<'a, 'b> App<'a, 'b> {
         if let Some(v) = homepage {
             app = app.after_help(v);
         }
-        Self { app: app }
+        Ok(Self { app: app })
     }
 
     pub fn launch<S, C, E>(self, server: &S) -> StdResult<(), E>

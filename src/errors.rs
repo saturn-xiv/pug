@@ -7,6 +7,7 @@ error_chain! {
         StdNumParseInt(std::num::ParseIntError);
         StdStringFromUtf8(std::string::FromUtf8Error);
 
+        Log4rs(log4rs::Error);
         JsonWebToken(jsonwebtoken::errors::Error);
         SerdeJson(serde_json::Error);
         Base64Decode(base64::DecodeError);

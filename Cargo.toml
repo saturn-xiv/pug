@@ -16,7 +16,6 @@ sqlite = ["diesel/sqlite", "libsqlite3-sys", "rocket_contrib/diesel_sqlite_pool"
 [dependencies]
 r2d2 = "0.8"
 log = "0.4"
-env_logger = "0.5"
 log4rs = "0.8"
 error-chain = "0.12"
 lazy_static = "1.0"
