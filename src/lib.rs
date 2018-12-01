@@ -66,23 +66,24 @@ pub mod crypto;
 pub mod env;
 pub mod errors;
 pub mod http;
+pub mod i18n;
 pub mod jwt;
+pub mod nut;
+pub mod orm;
 pub mod parser;
 pub mod queue;
-pub mod rfc;
-pub mod sys;
-
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
-pub mod i18n;
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
-pub mod nut;
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
-pub mod orm;
 #[cfg(feature = "redis")]
 pub mod redis;
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
+pub mod rfc;
 pub mod settings;
+pub mod sys;
 
+pub use self::diesel::{
+    date_time_expr, numeric_expr, operator_allowed, QueryId, __diesel_column,
+    __diesel_generate_ops_impls_if_date_time, __diesel_generate_ops_impls_if_numeric,
+    __diesel_table_impl, __diesel_table_query_source_impl, __diesel_use_everything, static_cond,
+    table, table_body,
+};
 pub use self::error_chain::{
     error_chain, error_chain_processing, impl_error_chain_kind, impl_error_chain_processed,
     impl_extract_backtrace,

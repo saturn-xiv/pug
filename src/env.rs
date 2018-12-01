@@ -5,7 +5,7 @@ use r2d2;
 use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel};
 use url::Url;
 
-#[cfg(any(feature = "redis"))]
+#[cfg(feature = "redis")]
 use r2d2_redis;
 
 use super::{
@@ -18,9 +18,7 @@ pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub env: String,
-    #[cfg(any(feature = "sodium"))]
     pub secrets: String,
-    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
     pub database: String,
     #[cfg(feature = "redis")]
     pub redis: String,
@@ -60,10 +58,11 @@ impl Config {
 
     pub fn rocket(&self) -> Result<RocketConfig> {
         let env = self.env();
-        let mut it = RocketConfig::build(env)
+        let it = RocketConfig::build(env)
             .address("0.0.0.0")
             .workers(self.http.workers)
             .port(self.http.port)
+            .secret_key(&self.secrets[..])
             .keep_alive(match self.http.keep_alive {
                 Some(v) => v,
                 None => 0,
@@ -73,6 +72,7 @@ impl Config {
                     .limit("forms", self.http.limits * (1 << 10 << 10))
                     .limit("json", self.http.limits * (1 << 10 << 10)),
             )
+            .extra("database", &self.database[..])
             .extra(
                 "template_dir",
                 match self.http.templates().to_str() {
@@ -84,22 +84,12 @@ impl Config {
                 Environment::Production => LoggingLevel::Normal,
                 _ => LoggingLevel::Debug,
             })
-            .workers(12);
+            .workers(12)
+            .finalize()?;
 
-        #[cfg(any(feature = "sodium"))]
-        {
-            it = it.secret_key(&self.secrets[..]);
-        }
-        #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
-        {
-            it = it.extra("database", &self.database[..]);
-        }
-
-        let it = it.finalize()?;
         Ok(it)
     }
 
-    #[cfg(any(feature = "sodium"))]
     pub fn secrets(&self) -> Result<Vec<u8>> {
         let buf = base64::decode(&self.secrets)?;
         Ok(buf)
@@ -112,7 +102,6 @@ impl Config {
         Ok(pool)
     }
 
-    #[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
     pub fn database(&self) -> Result<super::orm::Pool> {
         use diesel::r2d2::ConnectionManager;
         let manager = ConnectionManager::<super::orm::Connection>::new(&self.database[..]);

@@ -1,8 +1,6 @@
+pub mod database;
 pub mod generate;
 pub mod http;
-
-#[cfg(any(feature = "postgresql", feature = "mysql", feature = "sqlite"))]
-pub mod database;
 
 use std::result::Result as StdResult;
 
