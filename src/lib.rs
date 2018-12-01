@@ -8,8 +8,6 @@ extern crate serde_derive;
 #[macro_use]
 extern crate error_chain;
 #[macro_use]
-extern crate serde_json;
-#[macro_use]
 extern crate log;
 #[macro_use]
 extern crate lazy_static;
@@ -18,9 +16,9 @@ extern crate validator_derive;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
-extern crate hyper;
-#[macro_use]
 extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_json;
 
 extern crate base64;
 extern crate chrono;
@@ -29,6 +27,7 @@ extern crate clap;
 extern crate cookie;
 extern crate encoding_rs;
 extern crate futures;
+extern crate hyper;
 extern crate jsonwebtoken;
 extern crate language_tags;
 extern crate libc;

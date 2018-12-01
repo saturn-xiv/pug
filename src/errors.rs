@@ -25,6 +25,7 @@ error_chain! {
         UrlParse(url::ParseError);
         CookieParse(cookie::ParseError);
         RocketConfig(rocket::config::ConfigError);
+        Validation(validator::ValidationErrors);
 
         ZeroMq(zmq::Error);
         Redis(r2d2_redis::redis::RedisError);
