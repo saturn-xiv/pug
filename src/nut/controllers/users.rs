@@ -15,7 +15,7 @@ pub struct SignInFm {
 #[post("/sign-in", format = "json", data = "<form>")]
 pub fn sign_in(form: Json<SignInFm>) -> Result<JsonValue> {
     form.validate()?;
-    Ok(JsonValue(json!({})))
+    Ok(json!({}))
 }
 
 #[get("/logs")]

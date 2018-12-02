@@ -17,8 +17,6 @@ extern crate validator_derive;
 extern crate diesel;
 #[macro_use]
 extern crate rocket_contrib;
-#[macro_use]
-extern crate serde_json;
 
 extern crate base64;
 extern crate chrono;
@@ -42,6 +40,7 @@ extern crate regex;
 extern crate reqwest;
 extern crate rust_sodium;
 extern crate serde;
+extern crate serde_json;
 extern crate serde_xml_rs;
 extern crate tokio;
 extern crate tokio_codec;
