@@ -1,6 +1,6 @@
 table! {
     cards (id) {
-        id -> Bigint,
+        id -> Integer,
         title -> Varchar,
         body -> Text,
         media_type -> Varchar,
@@ -10,67 +10,67 @@ table! {
         loc -> Varchar,
         lang -> Varchar,
         position -> Tinyint,
-        created_at -> Datetime,
-        updated_at -> Datetime,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
 table! {
     links (id) {
-        id -> Bigint,
+        id -> Integer,
         href -> Varchar,
         label -> Varchar,
         loc -> Varchar,
         lang -> Varchar,
         x -> Tinyint,
         y -> Tinyint,
-        created_at -> Datetime,
-        updated_at -> Datetime,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
 table! {
     friend_links (id) {
-        id -> Bigint,
+        id -> Integer,
         title -> Varchar,
         home -> Varchar,
         logo -> Varchar,
         position -> Tinyint,
-        created_at -> Datetime,
-        updated_at -> Datetime,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
 table! {
     leave_words (id) {
-        id -> Bigint,
+        id -> Integer,
         body -> Text,
         media_type -> Varchar,
-        created_at -> Datetime,
+        created_at -> Timestamp,
     }
 }
 
 table! {
     notifications (id) {
-        id -> Bigint,
-        user_id -> Bigint,
+        id -> Integer,
+        user_id -> Integer,
         url -> Varchar,
         body -> Varchar,
         media_type -> Varchar,
         level -> Varchar,
         read -> Bool,
-        created_at -> Datetime,
-        updated_at -> Datetime,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
 table! {
     votes (id) {
-        id -> Bigint,
-        point -> Bigint,
+        id -> Integer,
+        point -> Integer,
         resource_type -> Varchar,
-        resource_id -> Bigint,
-        created_at -> Datetime,
-        updated_at -> Datetime,
+        resource_id -> Integer,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }

@@ -1,106 +1,4 @@
 table! {
-    attachments (id) {
-        id -> Integer,
-        user_id -> Integer,
-        name -> Varchar,
-        size -> Varchar,
-        mime_type -> Varchar,
-        url -> Varchar,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    cards (id) {
-        id -> Integer,
-        title -> Varchar,
-        body -> Text,
-        media_type -> Varchar,
-        action -> Varchar,
-        href -> Varchar,
-        logo -> Varchar,
-        loc -> Varchar,
-        lang -> Varchar,
-        position -> Tinyint,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    friend_links (id) {
-        id -> Integer,
-        title -> Varchar,
-        home -> Varchar,
-        logo -> Varchar,
-        position -> Tinyint,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    leave_words (id) {
-        id -> Integer,
-        body -> Text,
-        media_type -> Varchar,
-        created_at -> Timestamp,
-    }
-}
-
-table! {
-    links (id) {
-        id -> Integer,
-        href -> Varchar,
-        label -> Varchar,
-        loc -> Varchar,
-        lang -> Varchar,
-        x -> Tinyint,
-        y -> Tinyint,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    logs (id) {
-        id -> Integer,
-        user_id -> Integer,
-        ip -> Varchar,
-        message -> Varchar,
-        created_at -> Timestamp,
-    }
-}
-
-table! {
-    notifications (id) {
-        id -> Integer,
-        user_id -> Integer,
-        url -> Varchar,
-        body -> Varchar,
-        media_type -> Varchar,
-        level -> Varchar,
-        read -> Bool,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    policies (id) {
-        id -> Integer,
-        user_id -> Integer,
-        role -> Varchar,
-        resource -> Nullable<Varchar>,
-        nbf -> Date,
-        exp -> Date,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
     users (id) {
         id -> Integer,
         real_name -> Varchar,
@@ -125,11 +23,37 @@ table! {
 }
 
 table! {
-    votes (id) {
+    logs (id) {
         id -> Integer,
-        point -> Integer,
-        resource_type -> Varchar,
-        resource_id -> Integer,
+        user_id -> Integer,
+        ip -> Varchar,
+        message -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+table! {
+    policies (id) {
+        id -> Integer,
+        user_id -> Integer,
+        role -> Varchar,
+        resource_name -> Nullable<Varchar>,
+        resource_id -> Nullable<Integer>,
+        nbf -> Date,
+        exp -> Date,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    attachments (id) {
+        id -> Integer,
+        user_id -> Integer,
+        name -> Varchar,
+        size -> Varchar,
+        mime_type -> Varchar,
+        url -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
