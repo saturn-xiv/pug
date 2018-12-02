@@ -8,6 +8,7 @@ use super::super::errors::Result;
 pub fn interfaces() -> Result<Vec<String>> {
     let mut items = nix::ifaddrs::getifaddrs()?
         .filter(|x| {
+            // SIOCGIWNAME to test wifi
             x.flags.contains(nix::net::if_::InterfaceFlags::IFF_UP)
                 && x.flags.contains(nix::net::if_::InterfaceFlags::IFF_RUNNING)
                 && x.flags
