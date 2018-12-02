@@ -23,3 +23,8 @@ pub type PooledConnection = DieselPooledConnection<ConnectionManager<Connection>
 
 #[database("database")]
 pub struct Database(Connection);
+
+#[cfg(feature = "sqlite")]
+pub type ID = i32;
+#[cfg(any(feature = "postgresql", feature = "mysql"))]
+pub type ID = i64;

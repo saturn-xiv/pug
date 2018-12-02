@@ -19,7 +19,7 @@ use self::schema::locales;
 
 use super::super::{
     errors::Result,
-    orm::{schema::New as Schema, Connection},
+    orm::{schema::New as Schema, Connection, ID},
 };
 
 pub fn migration<'a>() -> Schema<'a> {
@@ -33,10 +33,7 @@ pub fn migration<'a>() -> Schema<'a> {
 
 #[derive(Queryable, Serialize)]
 pub struct Item {
-    #[cfg(feature = "sqlite")]
-    pub id: i32,
-    #[cfg(any(feature = "postgresql", feature = "mysql"))]
-    pub id: i64,
+    pub id: ID,
     pub lang: String,
     pub code: String,
     pub message: String,
@@ -55,6 +52,7 @@ pub struct New<'a> {
 
 pub trait Dao {
     fn languages(&self) -> Result<Vec<String>>;
+    fn all(&self, lang: &String) -> Result<Vec<Item>>;
     fn get(&self, lang: &String, code: &String) -> Result<String>;
     fn set(&self, lang: &String, code: &String, message: &String) -> Result<()>;
 }
@@ -65,6 +63,14 @@ impl Dao for Connection {
             .select(locales::dsl::lang)
             .distinct()
             .load::<String>(self)?)
+    }
+
+    fn all(&self, lang: &String) -> Result<Vec<Item>> {
+        let items = locales::dsl::locales
+            .filter(locales::dsl::lang.eq(lang))
+            .order(locales::dsl::code.asc())
+            .load::<Item>(self)?;
+        Ok(items)
     }
 
     fn get(&self, lang: &String, code: &String) -> Result<String> {

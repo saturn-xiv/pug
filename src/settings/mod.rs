@@ -13,7 +13,7 @@ use serde_json;
 use super::{
     crypto::Encryptor,
     errors::Result,
-    orm::{schema::New as Schema, Connection},
+    orm::{schema::New as Schema, Connection, ID},
 };
 
 #[cfg(feature = "mysql")]
@@ -36,10 +36,7 @@ pub fn migration<'a>() -> Schema<'a> {
 
 #[derive(Queryable)]
 pub struct Item {
-    #[cfg(feature = "sqlite")]
-    pub id: i32,
-    #[cfg(any(feature = "postgresql", feature = "mysql"))]
-    pub id: i64,
+    pub id: ID,
     pub key: String,
     pub value: Vec<u8>,
     pub salt: Option<Vec<u8>>,

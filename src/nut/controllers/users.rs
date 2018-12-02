@@ -2,7 +2,7 @@ use rocket_contrib::json::{Json, JsonValue};
 use validator::Validate;
 
 use super::super::super::errors::Result;
-use super::super::auth::Log;
+use super::super::auth::log;
 
 #[derive(Debug, Validate, Deserialize)]
 pub struct SignInFm {
@@ -19,7 +19,7 @@ pub fn sign_in(form: Json<SignInFm>) -> Result<JsonValue> {
 }
 
 #[get("/logs")]
-pub fn logs() -> Result<Json<Vec<Log>>> {
+pub fn logs() -> Result<Json<Vec<log::Item>>> {
     Ok(Json(Vec::new()))
 }
 

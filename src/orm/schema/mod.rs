@@ -21,13 +21,11 @@ pub use self::postgresql::*;
 pub use self::sqlite::*;
 
 use self::schema::schema_migrations;
+use super::ID;
 
 #[derive(Queryable)]
 pub struct Item {
-    #[cfg(feature = "sqlite")]
-    pub id: i32,
-    #[cfg(any(feature = "postgresql", feature = "mysql"))]
-    pub id: i64,
+    pub id: ID,
     pub version: String,
     pub name: String,
     pub up: String,
