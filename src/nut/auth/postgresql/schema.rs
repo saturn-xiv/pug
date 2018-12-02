@@ -50,8 +50,8 @@ table! {
     attachments (id) {
         id -> BigInt,
         user_id -> BigInt,
-        name -> Varchar,
-        size -> Varchar,
+        title -> Varchar,
+        size -> BigInt,
         mime_type -> Varchar,
         url -> Varchar,
         created_at -> Timestamp,

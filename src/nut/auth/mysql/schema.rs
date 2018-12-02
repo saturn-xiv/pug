@@ -33,19 +33,6 @@ table! {
 }
 
 table! {
-    attachments (id) {
-        id -> Bigint,
-        user_id -> Bigint,
-        name -> Varchar,
-        size -> Varchar,
-        mime_type -> Varchar,
-        url -> Varchar,
-        created_at -> Datetime,
-        updated_at -> Datetime,
-    }
-}
-
-table! {
     policies (id) {
         id -> Bigint,
         user_id -> Bigint,
@@ -54,6 +41,19 @@ table! {
         resource_id -> Nullable<BigInt>,
         nbf -> Date,
         exp -> Date,
+        created_at -> Datetime,
+        updated_at -> Datetime,
+    }
+}
+
+table! {
+    attachments (id) {
+        id -> Bigint,
+        user_id -> Bigint,
+        title -> Varchar,
+        size -> Bitint,
+        mime_type -> Varchar,
+        url -> Varchar,
         created_at -> Datetime,
         updated_at -> Datetime,
     }

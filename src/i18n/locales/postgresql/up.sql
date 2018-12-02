@@ -3,8 +3,8 @@ CREATE TABLE locales(
   lang VARCHAR(8) NOT NULL,
   code VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL
 );
 
 CREATE INDEX idx_locales_lang ON locales(lang);
