@@ -1,6 +1,6 @@
-pub mod admin;
 pub mod auth;
 pub mod controllers;
+pub mod site;
 
 use rocket::Route;
 

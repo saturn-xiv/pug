@@ -14,6 +14,17 @@ pub use self::sqlite::*;
 
 use chrono::NaiveDateTime;
 
+use super::super::orm::schema::New as Schema;
+
+pub fn migration<'a>() -> Schema<'a> {
+    Schema {
+        version: "20181202020324964361900",
+        name: "create-nut-auth",
+        up: UP,
+        down: DOWN,
+    }
+}
+
 #[derive(Queryable, Serialize)]
 pub struct Log {
     #[cfg(feature = "sqlite")]
