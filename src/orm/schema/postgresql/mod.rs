@@ -1,12 +1,3 @@
-pub const UP: &'static str = include_str!("up.sql");
+pub mod schema;
 
-table! {
-    schema_migrations (version) {
-        id -> Int8,
-        version -> Varchar,
-        name -> Varchar,
-        up -> Text,
-        down -> Text,
-        run_at -> Nullable<Timestamp>,
-    }
-}
+pub const UP: &'static str = include_str!("up.sql");

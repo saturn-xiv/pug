@@ -20,6 +20,8 @@ pub use self::postgresql::*;
 #[cfg(feature = "sqlite")]
 pub use self::sqlite::*;
 
+use self::schema::schema_migrations;
+
 #[derive(Queryable)]
 pub struct Item {
     #[cfg(feature = "sqlite")]
@@ -97,7 +99,8 @@ impl Migration for Connection {
                 update(
                     schema_migrations::dsl::schema_migrations
                         .filter(schema_migrations::dsl::id.eq(it.id)),
-                ).set(schema_migrations::dsl::run_at.eq(&Some(Utc::now().naive_utc())))
+                )
+                .set(schema_migrations::dsl::run_at.eq(&Some(Utc::now().naive_utc())))
                 .execute(self)?;
             }
         }
@@ -112,7 +115,8 @@ impl Migration for Connection {
                 delete(
                     schema_migrations::dsl::schema_migrations
                         .filter(schema_migrations::dsl::id.eq(it.id)),
-                ).execute(self)?;
+                )
+                .execute(self)?;
                 return Ok(());
             }
         }

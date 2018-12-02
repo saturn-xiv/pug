@@ -1,6 +1,6 @@
 table! {
     cards (id) {
-        id -> BigInt,
+        id -> Int8,
         title -> Varchar,
         body -> Text,
         media_type -> Varchar,
@@ -9,21 +9,7 @@ table! {
         logo -> Varchar,
         loc -> Varchar,
         lang -> Varchar,
-        position -> Tinyint,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    links (id) {
-        id -> BigInt,
-        href -> Varchar,
-        label -> Varchar,
-        loc -> Varchar,
-        lang -> Varchar,
-        x -> Tinyint,
-        y -> Tinyint,
+        position -> Int2,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -31,11 +17,12 @@ table! {
 
 table! {
     friend_links (id) {
-        id -> BigInt,
+        id -> Int8,
         title -> Varchar,
         home -> Varchar,
         logo -> Varchar,
-        position -> Tinyint,
+        lang -> Varchar,
+        position -> Int2,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -43,20 +30,43 @@ table! {
 
 table! {
     leave_words (id) {
-        id -> BigInt,
+        id -> Int8,
         body -> Text,
         media_type -> Varchar,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    links (id) {
+        id -> Int8,
+        href -> Varchar,
+        label -> Varchar,
+        loc -> Varchar,
+        lang -> Varchar,
+        x -> Int2,
+        y -> Int2,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
 table! {
     votes (id) {
-        id -> BigInt,
-        point -> BigInt,
+        id -> Int8,
+        point -> Int8,
         resource_type -> Varchar,
-        resource_id -> BigInt,
+        resource_id -> Int8,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
 }
+
+allow_tables_to_appear_in_same_query!(
+    cards,
+    friend_links,
+    leave_words,
+    links,
+    votes,
+);

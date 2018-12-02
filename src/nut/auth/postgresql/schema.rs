@@ -1,6 +1,57 @@
 table! {
+    attachments (id) {
+        id -> Int8,
+        user_id -> Int8,
+        title -> Varchar,
+        size -> Int8,
+        mime_type -> Varchar,
+        url -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    logs (id) {
+        id -> Int8,
+        user_id -> Int8,
+        ip -> Varchar,
+        message -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+table! {
+    notifications (id) {
+        id -> Int8,
+        user_id -> Int4,
+        url -> Varchar,
+        body -> Text,
+        media_type -> Varchar,
+        level -> Varchar,
+        read -> Bool,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    policies (id) {
+        id -> Int8,
+        user_id -> Int8,
+        role -> Varchar,
+        resource_name -> Nullable<Varchar>,
+        resource_id -> Nullable<Int8>,
+        nbf -> Date,
+        exp -> Date,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     users (id) {
-        id -> BigInt,
+        id -> Int8,
         real_name -> Varchar,
         nick_name -> Varchar,
         email -> Varchar,
@@ -9,7 +60,7 @@ table! {
         provider_type -> Varchar,
         provider_id -> Varchar,
         logo -> Varchar,
-        sign_in_count -> BigInt,
+        sign_in_count -> Int8,
         current_sign_in_at -> Nullable<Timestamp>,
         current_sign_in_ip -> Nullable<Varchar>,
         last_sign_in_at -> Nullable<Timestamp>,
@@ -22,53 +73,10 @@ table! {
     }
 }
 
-table! {
-    logs (id) {
-        id -> BigInt,
-        user_id -> BigInt,
-        ip -> Varchar,
-        message -> Varchar,
-        created_at -> Timestamp,
-    }
-}
-
-table! {
-    policies (id) {
-        id -> BigInt,
-        user_id -> BigInt,
-        role -> Varchar,
-        resource_name -> Nullable<Varchar>,
-        resource_id -> Nullable<BigInt>,
-        nbf -> Date,
-        exp -> Date,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    attachments (id) {
-        id -> BigInt,
-        user_id -> BigInt,
-        title -> Varchar,
-        size -> BigInt,
-        mime_type -> Varchar,
-        url -> Varchar,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    notifications (id) {
-        id -> BigInt,
-        user_id -> BigInt,
-        url -> Varchar,
-        body -> Text,
-        media_type -> Varchar,
-        level -> Varchar,
-        read -> Bool,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
+allow_tables_to_appear_in_same_query!(
+    attachments,
+    logs,
+    notifications,
+    policies,
+    users,
+);
