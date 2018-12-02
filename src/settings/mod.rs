@@ -23,6 +23,8 @@ pub use self::postgresql::*;
 #[cfg(feature = "sqlite")]
 pub use self::sqlite::*;
 
+use self::schema::settings;
+
 pub fn migration<'a>() -> Schema<'a> {
     Schema {
         version: "20181123203833948693021",
@@ -109,7 +111,8 @@ impl Dao for Connection {
                         settings::dsl::value.eq(&val),
                         settings::dsl::salt.eq(&salt),
                         settings::dsl::updated_at.eq(&now),
-                    )).execute(self)?;
+                    ))
+                    .execute(self)?;
             }
             Err(_) => {
                 insert_into(settings::dsl::settings)
@@ -121,7 +124,8 @@ impl Dao for Connection {
                             None => None,
                         },
                         updated_at: &now,
-                    }).execute(self)?;
+                    })
+                    .execute(self)?;
             }
         };
         Ok(())

@@ -15,6 +15,8 @@ pub use self::postgresql::*;
 #[cfg(feature = "sqlite")]
 pub use self::sqlite::*;
 
+use self::schema::locales;
+
 use super::super::{
     errors::Result,
     orm::{schema::New as Schema, Connection},
@@ -85,7 +87,8 @@ impl Dao for Connection {
                     .set((
                         locales::dsl::message.eq(message),
                         locales::dsl::updated_at.eq(&now),
-                    )).execute(self)?;
+                    ))
+                    .execute(self)?;
             }
             Err(_) => {
                 insert_into(locales::dsl::locales)
@@ -94,7 +97,8 @@ impl Dao for Connection {
                         code: code,
                         message: message,
                         updated_at: &now,
-                    }).execute(self)?;
+                    })
+                    .execute(self)?;
             }
         }
         Ok(())

@@ -65,7 +65,7 @@ CREATE TABLE notifications(
   body TEXT NOT NULL,
   media_type VARCHAR(8) NOT NULL,
   level VARCHAR(8) NOT NULL,
-  read BOOLEAN NOT NULL
+  read BOOLEAN NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL
 );
