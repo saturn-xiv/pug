@@ -103,7 +103,8 @@ table! {
 table! {
     users (id) {
         id -> Bigint,
-        name -> Varchar,
+        real_name -> Varchar,
+        nick_name -> Varchar,
         email -> Varchar,
         password -> Nullable<Blob>,
         uid -> Varchar,

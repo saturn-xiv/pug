@@ -1,7 +1,7 @@
 table! {
     attachments (id) {
-        id -> BigInt,
-        user_id -> BigInt,
+        id -> Integer,
+        user_id -> Integer,
         name -> Varchar,
         size -> Varchar,
         mime_type -> Varchar,
@@ -13,7 +13,7 @@ table! {
 
 table! {
     cards (id) {
-        id -> BigInt,
+        id -> Integer,
         title -> Varchar,
         body -> Text,
         media_type -> Varchar,
@@ -30,7 +30,7 @@ table! {
 
 table! {
     friend_links (id) {
-        id -> BigInt,
+        id -> Integer,
         title -> Varchar,
         home -> Varchar,
         logo -> Varchar,
@@ -42,7 +42,7 @@ table! {
 
 table! {
     leave_words (id) {
-        id -> BigInt,
+        id -> Integer,
         body -> Text,
         media_type -> Varchar,
         created_at -> Timestamp,
@@ -51,7 +51,7 @@ table! {
 
 table! {
     links (id) {
-        id -> BigInt,
+        id -> Integer,
         href -> Varchar,
         label -> Varchar,
         loc -> Varchar,
@@ -65,8 +65,8 @@ table! {
 
 table! {
     logs (id) {
-        id -> BigInt,
-        user_id -> BigInt,
+        id -> Integer,
+        user_id -> Integer,
         ip -> Varchar,
         message -> Varchar,
         created_at -> Timestamp,
@@ -75,8 +75,8 @@ table! {
 
 table! {
     notifications (id) {
-        id -> BigInt,
-        user_id -> BigInt,
+        id -> Integer,
+        user_id -> Integer,
         url -> Varchar,
         body -> Varchar,
         media_type -> Varchar,
@@ -89,8 +89,8 @@ table! {
 
 table! {
     policies (id) {
-        id -> BigInt,
-        user_id -> BigInt,
+        id -> Integer,
+        user_id -> Integer,
         role -> Varchar,
         resource -> Nullable<Varchar>,
         nbf -> Date,
@@ -102,16 +102,16 @@ table! {
 
 table! {
     users (id) {
-        id -> BigInt,
+        id -> Integer,
         real_name -> Varchar,
         nick_name -> Varchar,
         email -> Varchar,
-        password -> Nullable<Bytea>,
+        password -> Nullable<Binary>,
         uid -> Varchar,
         provider_type -> Varchar,
         provider_id -> Varchar,
         logo -> Varchar,
-        sign_in_count -> BigInt,
+        sign_in_count -> Integer,
         current_sign_in_at -> Nullable<Timestamp>,
         current_sign_in_ip -> Nullable<Varchar>,
         last_sign_in_at -> Nullable<Timestamp>,
@@ -126,10 +126,10 @@ table! {
 
 table! {
     votes (id) {
-        id -> BigInt,
-        point -> BigInt,
+        id -> Integer,
+        point -> Integer,
         resource_type -> Varchar,
-        resource_id -> BigInt,
+        resource_id -> Integer,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
