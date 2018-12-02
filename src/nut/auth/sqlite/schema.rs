@@ -40,8 +40,7 @@ table! {
         id -> Integer,
         user_id -> Integer,
         role -> Text,
-        resource_name -> Nullable<Text>,
-        resource_id -> Nullable<Integer>,
+        resource -> Nullable<Text>,
         nbf -> Date,
         exp -> Date,
         created_at -> Timestamp,
@@ -73,10 +72,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    attachments,
-    logs,
-    notifications,
-    policies,
-    users,
-);
+allow_tables_to_appear_in_same_query!(attachments, logs, notifications, policies, users,);

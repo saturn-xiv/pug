@@ -40,8 +40,7 @@ table! {
         id -> Bigint,
         user_id -> Bigint,
         role -> Varchar,
-        resource_name -> Nullable<Varchar>,
-        resource_id -> Nullable<Bigint>,
+        resource -> Nullable<Varchar>,
         nbf -> Date,
         exp -> Date,
         created_at -> Datetime,
@@ -73,10 +72,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    attachments,
-    logs,
-    notifications,
-    policies,
-    users,
-);
+allow_tables_to_appear_in_same_query!(attachments, logs, notifications, policies, users,);
