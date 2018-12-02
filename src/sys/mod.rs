@@ -6,6 +6,13 @@ use nix;
 
 use super::errors::Result;
 
+pub fn reboot() -> Result<()> {
+    warn!("reboot system!!!");
+    nix::unistd::sync();
+    nix::sys::reboot::reboot(nix::sys::reboot::RebootMode::RB_AUTOBOOT)?;
+    Ok(())
+}
+
 pub fn hostname() -> Result<String> {
     let mut buf = [0u8; 64];
     let it = nix::unistd::gethostname(&mut buf)?.to_str()?;
