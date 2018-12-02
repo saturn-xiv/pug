@@ -28,7 +28,6 @@ extern crate futures;
 extern crate hyper;
 extern crate jsonwebtoken;
 extern crate language_tags;
-extern crate libc;
 extern crate log4rs;
 extern crate mime;
 extern crate mustache;
