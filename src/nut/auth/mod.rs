@@ -1,4 +1,5 @@
 pub mod log;
+pub mod user;
 
 #[cfg(feature = "mysql")]
 mod mysql;

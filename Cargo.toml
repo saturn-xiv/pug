@@ -51,6 +51,8 @@ zmq = "0.8"
 nix = "0.12"
 eui48 = "0.4"
 rust_sodium = "0.10"
+hex = "0.3"
+md5 = "0.6"
 mustache = "*"
 
 [dependencies.openssl-sys]
@@ -64,6 +66,10 @@ features = ["serde"]
 [dependencies.url]
 version = "1.7"
 features=["query_encoding"]
+
+[dependencies.uuid]
+version = "0.7"
+features = ["v4"]
 
 [dependencies.diesel]
 version = "1.3"

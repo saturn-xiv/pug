@@ -8,7 +8,7 @@ CREATE TABLE users(
   provider_type VARCHAR(16) NOT NULL,
   provider_id VARCHAR(255) NOT NULL,
   logo VARCHAR(255) NOT NULL,
-  sign_in_count BIGINT NOT NULL,
+  sign_in_count BIGINT NOT NULL DEFAULT 0,
   current_sign_in_at TIMESTAMP,
   current_sign_in_ip VARCHAR(39),
   last_sign_in_at TIMESTAMP,

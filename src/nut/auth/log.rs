@@ -5,7 +5,7 @@ use super::super::super::{
     errors::Result,
     orm::{Connection, ID},
 };
-use super::schema::*;
+use super::schema::logs;
 
 #[derive(Queryable, Serialize)]
 pub struct Item {
