@@ -1,7 +1,7 @@
 table! {
-    schema_migrations (version) {
+    schema_migrations (id) {
         id -> Int8,
-        version -> Varchar,
+        version -> Bpchar,
         name -> Varchar,
         up -> Text,
         down -> Text,

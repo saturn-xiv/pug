@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS schema_migrations(
-  id BIGSERIAL PRIMARY KEY,
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   version CHAR(23) NOT NULL,
   name VARCHAR(255) NOT NULL,
   up TEXT NOT NULL,
@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS schema_migrations(
   run_at DATETIME
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_schema_migrations ON schema_migrations(version, name);
+ALTER TABLE schema_migrations ADD UNIQUE INDEX (version, name);
