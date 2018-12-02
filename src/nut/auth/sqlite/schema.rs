@@ -1,22 +1,11 @@
 table! {
-    users (id) {
+    attachments (id) {
         id -> Integer,
-        real_name -> Varchar,
-        nick_name -> Varchar,
-        email -> Varchar,
-        password -> Nullable<Binary>,
-        uid -> Varchar,
-        provider_type -> Varchar,
-        provider_id -> Varchar,
-        logo -> Varchar,
-        sign_in_count -> BigInt,
-        current_sign_in_at -> Nullable<Timestamp>,
-        current_sign_in_ip -> Nullable<Varchar>,
-        last_sign_in_at -> Nullable<Timestamp>,
-        last_sign_in_ip -> Nullable<Varchar>,
-        confirmed_at -> Nullable<Timestamp>,
-        locked_at -> Nullable<Timestamp>,
-        deleted_at -> Nullable<Timestamp>,
+        user_id -> Integer,
+        title -> Text,
+        size -> BigInt,
+        mime_type -> Text,
+        url -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -26,9 +15,23 @@ table! {
     logs (id) {
         id -> Integer,
         user_id -> Integer,
-        ip -> Varchar,
-        message -> Varchar,
+        ip -> Text,
+        message -> Text,
         created_at -> Timestamp,
+    }
+}
+
+table! {
+    notifications (id) {
+        id -> Integer,
+        user_id -> Integer,
+        url -> Text,
+        body -> Text,
+        media_type -> Text,
+        level -> Text,
+        read -> Bool,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
@@ -36,8 +39,8 @@ table! {
     policies (id) {
         id -> Integer,
         user_id -> Integer,
-        role -> Varchar,
-        resource_name -> Nullable<Varchar>,
+        role -> Text,
+        resource_name -> Nullable<Text>,
         resource_id -> Nullable<Integer>,
         nbf -> Date,
         exp -> Date,
@@ -47,28 +50,33 @@ table! {
 }
 
 table! {
-    attachments (id) {
+    users (id) {
         id -> Integer,
-        user_id -> Integer,
-        title -> Varchar,
-        size -> BigInt,
-        mime_type -> Varchar,
-        url -> Varchar,
+        real_name -> Text,
+        nick_name -> Text,
+        email -> Text,
+        password -> Nullable<Binary>,
+        uid -> Text,
+        provider_type -> Text,
+        provider_id -> Text,
+        logo -> Text,
+        sign_in_count -> BigInt,
+        current_sign_in_at -> Nullable<Timestamp>,
+        current_sign_in_ip -> Nullable<Text>,
+        last_sign_in_at -> Nullable<Timestamp>,
+        last_sign_in_ip -> Nullable<Text>,
+        confirmed_at -> Nullable<Timestamp>,
+        locked_at -> Nullable<Timestamp>,
+        deleted_at -> Nullable<Timestamp>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
 }
 
-table! {
-    notifications (id) {
-        id -> Integer,
-        user_id -> Integer,
-        url -> Varchar,
-        body -> Text,
-        media_type -> Varchar,
-        level -> Varchar,
-        read -> Bool,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
+allow_tables_to_appear_in_same_query!(
+    attachments,
+    logs,
+    notifications,
+    policies,
+    users,
+);

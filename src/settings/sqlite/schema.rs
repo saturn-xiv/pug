@@ -4,7 +4,7 @@ table! {
         key -> Text,
         value -> Binary,
         salt -> Nullable<Binary>,
-        updated_at -> Timestamp,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }

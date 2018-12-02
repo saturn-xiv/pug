@@ -9,7 +9,30 @@ table! {
         logo -> Varchar,
         loc -> Varchar,
         lang -> Varchar,
-        position -> Tinyint,
+        position -> Smallint,
+        created_at -> Datetime,
+        updated_at -> Datetime,
+    }
+}
+
+table! {
+    friend_links (id) {
+        id -> Bigint,
+        title -> Varchar,
+        home -> Varchar,
+        logo -> Varchar,
+        lang -> Varchar,
+        position -> Smallint,
+        created_at -> Datetime,
+        updated_at -> Datetime,
+    }
+}
+
+table! {
+    leave_words (id) {
+        id -> Bigint,
+        body -> Text,
+        media_type -> Varchar,
         created_at -> Datetime,
         updated_at -> Datetime,
     }
@@ -22,31 +45,10 @@ table! {
         label -> Varchar,
         loc -> Varchar,
         lang -> Varchar,
-        x -> Tinyint,
-        y -> Tinyint,
+        x -> Smallint,
+        y -> Smallint,
         created_at -> Datetime,
         updated_at -> Datetime,
-    }
-}
-
-table! {
-    friend_links (id) {
-        id -> Bigint,
-        title -> Varchar,
-        home -> Varchar,
-        logo -> Varchar,
-        position -> Tinyint,
-        created_at -> Datetime,
-        updated_at -> Datetime,
-    }
-}
-
-table! {
-    leave_words (id) {
-        id -> Bigint,
-        body -> Text,
-        media_type -> Varchar,
-        created_at -> Datetime,
     }
 }
 
@@ -60,3 +62,11 @@ table! {
         updated_at -> Datetime,
     }
 }
+
+allow_tables_to_appear_in_same_query!(
+    cards,
+    friend_links,
+    leave_words,
+    links,
+    votes,
+);

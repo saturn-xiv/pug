@@ -1,29 +1,15 @@
 table! {
     cards (id) {
         id -> Integer,
-        title -> Varchar,
+        title -> Text,
         body -> Text,
-        media_type -> Varchar,
-        action -> Varchar,
-        href -> Varchar,
-        logo -> Varchar,
-        loc -> Varchar,
-        lang -> Varchar,
-        position -> Tinyint,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
-    }
-}
-
-table! {
-    links (id) {
-        id -> Integer,
-        href -> Varchar,
-        label -> Varchar,
-        loc -> Varchar,
-        lang -> Varchar,
-        x -> Tinyint,
-        y -> Tinyint,
+        media_type -> Text,
+        action -> Text,
+        href -> Text,
+        logo -> Text,
+        loc -> Text,
+        lang -> Text,
+        position -> SmallInt,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -32,10 +18,11 @@ table! {
 table! {
     friend_links (id) {
         id -> Integer,
-        title -> Varchar,
-        home -> Varchar,
-        logo -> Varchar,
-        position -> Tinyint,
+        title -> Text,
+        home -> Text,
+        logo -> Text,
+        lang -> Text,
+        position -> SmallInt,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -45,18 +32,41 @@ table! {
     leave_words (id) {
         id -> Integer,
         body -> Text,
-        media_type -> Varchar,
+        media_type -> Text,
         created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
+    links (id) {
+        id -> Integer,
+        href -> Text,
+        label -> Text,
+        loc -> Text,
+        lang -> Text,
+        x -> SmallInt,
+        y -> SmallInt,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
 table! {
     votes (id) {
         id -> Integer,
-        point -> Integer,
-        resource_type -> Varchar,
+        point -> BigInt,
+        resource_type -> Text,
         resource_id -> Integer,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
 }
+
+allow_tables_to_appear_in_same_query!(
+    cards,
+    friend_links,
+    leave_words,
+    links,
+    votes,
+);
