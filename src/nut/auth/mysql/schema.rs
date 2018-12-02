@@ -51,9 +51,23 @@ table! {
         id -> Bigint,
         user_id -> Bigint,
         title -> Varchar,
-        size -> Bitint,
+        size -> Bigint,
         mime_type -> Varchar,
         url -> Varchar,
+        created_at -> Datetime,
+        updated_at -> Datetime,
+    }
+}
+
+table! {
+    notifications (id) {
+        id -> Bigint,
+        user_id -> Bigint,
+        url -> Varchar,
+        body -> Text,
+        media_type -> Varchar,
+        level -> Varchar,
+        read -> Bool,
         created_at -> Datetime,
         updated_at -> Datetime,
     }

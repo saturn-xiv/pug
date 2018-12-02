@@ -57,3 +57,16 @@ CREATE TABLE attachments(
   updated_at TIMESTAMP NOT NULL
 );
 CREATE INDEX idx_attachments ON attachments(title);
+
+CREATE TABLE notifications(
+  id BIGSERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  url VARCHAR(255) NOT NULL,
+  body TEXT NOT NULL,
+  media_type VARCHAR(8) NOT NULL,
+  level VARCHAR(8) NOT NULL,
+  read BOOLEAN NOT NULL
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL
+);
+CREATE INDEX idx_notifications ON notifications(level);

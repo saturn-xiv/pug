@@ -58,3 +58,17 @@ table! {
         updated_at -> Timestamp,
     }
 }
+
+table! {
+    notifications (id) {
+        id -> BigInt,
+        user_id -> BigInt,
+        url -> Varchar,
+        body -> Text,
+        media_type -> Varchar,
+        level -> Varchar,
+        read -> Bool,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}

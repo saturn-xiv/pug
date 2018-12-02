@@ -16,7 +16,7 @@ CREATE TABLE users(
   confirmed_at DATETIME,
   locked_at DATETIME,
   deleted_at DATETIME,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL
 );
 CREATE INDEX idx_users_real_name ON users(real_name);
@@ -30,7 +30,7 @@ CREATE TABLE logs(
   user_id BIGINT NOT NULL,
   ip VARCHAR(39) NOT NULL,
   message VARCHAR(255) NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_DATETIME
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE policies(
@@ -41,7 +41,7 @@ CREATE TABLE policies(
   resource_id BIGINT,
   nbf DATE NOT NULL,
   exp DATE NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL
 );
 CREATE INDEX idx_policies_role ON policies(role);
@@ -53,7 +53,20 @@ CREATE TABLE attachments(
   size BIGINT NOT NULL,
   mime_type VARCHAR(255) NOT NULL,
   url VARCHAR(255) NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL
 );
 CREATE INDEX idx_attachments ON attachments(title);
+
+CREATE TABLE notifications(
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  user_id BIGINT NOT NULL,
+  url VARCHAR(255) NOT NULL,
+  body TEXT NOT NULL,
+  media_type VARCHAR(8) NOT NULL,
+  level VARCHAR(8) NOT NULL,
+  read BOOLEAN NOT NULL
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL
+);
+CREATE INDEX idx_notifications ON notifications(level);

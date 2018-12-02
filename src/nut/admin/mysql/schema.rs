@@ -51,20 +51,6 @@ table! {
 }
 
 table! {
-    notifications (id) {
-        id -> Bigint,
-        user_id -> Bigint,
-        url -> Varchar,
-        body -> Varchar,
-        media_type -> Varchar,
-        level -> Varchar,
-        read -> Bool,
-        created_at -> Datetime,
-        updated_at -> Datetime,
-    }
-}
-
-table! {
     votes (id) {
         id -> Bigint,
         point -> Bigint,
