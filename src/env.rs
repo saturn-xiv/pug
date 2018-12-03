@@ -8,6 +8,7 @@ use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel};
 use super::{
     crypto::{self, Encryptor},
     errors::Result,
+    oauth::Config as OauthConfig,
 };
 
 pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -20,6 +21,7 @@ pub struct Config {
     pub redis: Option<String>,
     pub rabbitmq: Option<String>,
     pub http: Http,
+    pub oauth: Option<OauthConfig>,
 }
 
 impl Default for Config {
@@ -36,6 +38,7 @@ impl Default for Config {
             #[cfg(feature = "postgresql")]
             database: "postgres://postgres:@localhost:5432/pug".to_string(),
             rabbitmq: Some("rabbitmq://".to_string()),
+            oauth: None,
         }
     }
 }

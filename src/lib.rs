@@ -63,6 +63,7 @@ pub mod errors;
 pub mod i18n;
 pub mod jwt;
 pub mod nut;
+pub mod oauth;
 pub mod orm;
 pub mod parser;
 pub mod queue;
