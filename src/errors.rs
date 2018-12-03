@@ -1,5 +1,13 @@
-error_chain! {
+use std::io::Cursor;
+use std::result::Result as StdResult;
 
+use rocket::{
+    http::{ContentType, Status},
+    response::Responder,
+    Request, Response,
+};
+
+error_chain! {
     foreign_links {
         StdIo(std::io::Error);
         StdSystemTime(std::time::SystemTimeError);
@@ -30,5 +38,15 @@ error_chain! {
         Nix(nix::Error);
         Redis(r2d2_redis::redis::RedisError);
     }
+}
 
+impl<'r> Responder<'r> for Error {
+    fn respond_to(self, _: &Request) -> StdResult<Response<'r>, Status> {
+        error!("{:?}", self);
+        Ok(Response::build()
+            .header(ContentType::Plain)
+            .status(Status::InternalServerError)
+            .sized_body(Cursor::new(self.description().to_string()))
+            .finalize())
+    }
 }

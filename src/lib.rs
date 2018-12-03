@@ -60,7 +60,6 @@ pub mod cache;
 pub mod crypto;
 pub mod env;
 pub mod errors;
-pub mod http;
 pub mod i18n;
 pub mod jwt;
 pub mod nut;

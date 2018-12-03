@@ -5,6 +5,7 @@ mod postgresql;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 
+use std::cmp::Ordering;
 use std::fmt;
 
 use chrono::{NaiveDateTime, Utc};
@@ -48,7 +49,7 @@ impl fmt::Display for Item {
     }
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Eq)]
 #[table_name = "schema_migrations"]
 pub struct New<'a> {
     pub version: &'a str,
@@ -60,6 +61,24 @@ pub struct New<'a> {
 impl<'a> fmt::Display for New<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}-{}", self.version, self.name)
+    }
+}
+
+impl<'a> Ord for New<'a> {
+    fn cmp(&self, other: &New) -> Ordering {
+        self.version.cmp(&other.version)
+    }
+}
+
+impl<'a> PartialOrd for New<'a> {
+    fn partial_cmp(&self, other: &New) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<'a> PartialEq for New<'a> {
+    fn eq(&self, other: &New) -> bool {
+        self.version == other.version
     }
 }
 
@@ -123,7 +142,7 @@ impl Migration for Connection {
     }
     fn versions(&self) -> Result<Vec<Item>> {
         let items = schema_migrations::dsl::schema_migrations
-            .order(schema_migrations::dsl::version.desc())
+            .order(schema_migrations::dsl::version.asc())
             .load(self)?;
         Ok(items)
     }
