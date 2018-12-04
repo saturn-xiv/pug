@@ -1,12 +1,14 @@
-use hyper::header::Header;
+use hyper::header::Header as HyperHeader;
 use rocket::{
     http::{
-        hyper::header::{Authorization, Bearer, Host as HyperHost},
-        Status,
+        hyper::header::{AcceptLanguage, Authorization, Bearer, Host as HyperHost},
+        Cookies, Status,
     },
     request::{self, FromRequest},
     Outcome, Request,
 };
+
+use super::super::i18n::I18n;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Host {
@@ -26,7 +28,7 @@ impl From<HyperHost> for Host {
 impl<'a, 'r> FromRequest<'a, 'r> for Host {
     type Error = ();
 
-    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, ()> {
+    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
         if let Some(host) = req.headers().get_one(HyperHost::header_name()) {
             if let Ok(host) = host.parse::<HyperHost>() {
                 return Outcome::Success(host.into());
@@ -42,7 +44,7 @@ pub struct Token(pub Option<String>);
 impl<'a, 'r> FromRequest<'a, 'r> for Token {
     type Error = ();
 
-    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, ()> {
+    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
         if let Some(auth) = req
             .headers()
             .get_one(Authorization::<Bearer>::header_name())
@@ -52,5 +54,60 @@ impl<'a, 'r> FromRequest<'a, 'r> for Token {
             }
         }
         Outcome::Success(Token(None))
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Locale(pub String);
+
+impl Locale {
+    fn parse(req: &Request) -> Option<String> {
+        let key = "locale";
+        // 1. Check URL arguments.
+        // 2. Get language information from cookies.
+        if let Outcome::Success(cookies) = req.guard::<Cookies>() {
+            if let Some(it) = cookies.get(key) {
+                return Some(it.value().to_string());
+            }
+        }
+        // 3. Get language information from 'Accept-Language'.
+        // https://www.w3.org/International/questions/qa-accept-lang-locales
+        // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+
+        if let Ok(AcceptLanguage(al)) = AcceptLanguage::parse_header(
+            &req.headers()
+                .get(AcceptLanguage::header_name())
+                .map(|x| x.as_bytes().to_vec())
+                .collect::<Vec<Vec<u8>>>(),
+        ) {
+            for it in al {
+                if let Some(lng) = it.item.language {
+                    return Some(lng);
+                }
+            }
+        }
+        None
+    }
+    fn detect(req: &Request) -> Option<String> {
+        if let Some(lang) = Self::parse(req) {
+            if let Outcome::Success(i18n) = req.guard::<I18n>() {
+                if i18n.exist(&lang) {
+                    return Some(lang);
+                }
+            }
+        }
+        None
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for Locale {
+    type Error = ();
+
+    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        let lang = match Self::detect(req) {
+            Some(v) => v,
+            None => "en_US".to_string(),
+        };
+        Outcome::Success(Locale(lang))
     }
 }

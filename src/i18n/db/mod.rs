@@ -5,6 +5,8 @@ mod postgresql;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 
+use std::ops::Deref;
+
 use chrono::{NaiveDateTime, Utc};
 use diesel::{insert_into, prelude::*, update};
 
@@ -19,7 +21,7 @@ use self::schema::locales;
 
 use super::super::{
     errors::Result,
-    orm::{schema::New as Schema, Connection, ID},
+    orm::{schema::New as Schema, Connection, PooledConnection, ID},
 };
 
 pub fn migration<'a>() -> Schema<'a> {
@@ -52,6 +54,7 @@ pub struct New<'a> {
 
 pub trait Dao {
     fn languages(&self) -> Result<Vec<String>>;
+    fn count(&self, lang: &String) -> Result<i64>;
     fn all(&self, lang: &String) -> Result<Vec<Item>>;
     fn get(&self, lang: &String, code: &String) -> Result<String>;
     fn set(&self, lang: &String, code: &String, message: &String) -> Result<()>;
@@ -63,6 +66,14 @@ impl Dao for Connection {
             .select(locales::dsl::lang)
             .distinct()
             .load::<String>(self)?)
+    }
+
+    fn count(&self, lang: &String) -> Result<i64> {
+        let cnt: i64 = locales::dsl::locales
+            .count()
+            .filter(locales::dsl::lang.eq(lang))
+            .get_result(self)?;
+        Ok(cnt)
     }
 
     fn all(&self, lang: &String) -> Result<Vec<Item>> {
@@ -108,5 +119,21 @@ impl Dao for Connection {
             }
         }
         Ok(())
+    }
+}
+
+impl super::Provider for PooledConnection {
+    fn get(&self, lang: &String, code: &String) -> Option<String> {
+        if let Ok(v) = self.deref().get(lang, code) {
+            return Some(v);
+        }
+        None
+    }
+
+    fn exist(&self, lang: &String) -> bool {
+        if let Ok(c) = self.deref().count(lang) {
+            return c > 0;
+        }
+        false
     }
 }
