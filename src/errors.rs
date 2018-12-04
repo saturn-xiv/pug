@@ -22,7 +22,6 @@ error_chain! {
         TomlDe(toml::de::Error);
         TomlSer(toml::ser::Error);
         Hyper(hyper::Error);
-        HyperHeaderToStr(hyper::header::ToStrError);
         LanguageTags(language_tags::Error);
         ChronoParse(chrono::ParseError);
         XmlReader(xml::reader::Error);
@@ -31,7 +30,6 @@ error_chain! {
         Mustache(mustache::Error);
         R2d2(r2d2::Error);
         UrlParse(url::ParseError);
-        CookieParse(cookie::ParseError);
         RocketConfig(rocket::config::ConfigError);
         Validation(validator::ValidationErrors);
         ZeroMq(zmq::Error);

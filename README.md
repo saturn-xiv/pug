@@ -2,6 +2,15 @@
 
 Pug is a web-application framework that includes everything needed to create database-backed web applications according to the Model-View-Controller (MVC) pattern.
 
+## Atom editor plugins
+
+-   autosave: enable
+-   file-icons
+-   atom-beautify: enable beautify on save; pretty diff
+-   ide-rust: disable toolchain update checking
+-   language-babel
+-   language-docker
+
 ## Resources
 
 -   [favicon.ico](http://icoconvert.com/)
