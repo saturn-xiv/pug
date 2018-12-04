@@ -21,7 +21,7 @@ pub use self::sqlite::*;
 pub type Pool = DieselPool<ConnectionManager<Connection>>;
 pub type PooledConnection = DieselPooledConnection<ConnectionManager<Connection>>;
 
-#[database("database")]
+#[database("diesel")]
 pub struct Database(Connection);
 
 #[cfg(feature = "sqlite")]

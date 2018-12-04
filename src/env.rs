@@ -1,9 +1,10 @@
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use base64;
 use r2d2;
 use r2d2_redis;
-use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel};
+use rocket::config::{Config as RocketConfig, Environment, Limits, LoggingLevel, Value};
 
 use super::{
     crypto::{self, Encryptor},
@@ -53,6 +54,18 @@ impl Config {
 
     pub fn rocket(&self) -> Result<RocketConfig> {
         let env = self.env();
+        let mut databases = BTreeMap::new();
+        {
+            let mut cfg = BTreeMap::new();
+            cfg.insert("url".to_string(), Value::String(self.database.clone()));
+            databases.insert("diesel".to_string(), cfg);
+        }
+        if let Some(ref u) = self.redis {
+            let mut cfg = BTreeMap::new();
+            cfg.insert("url".to_string(), Value::String(u.clone()));
+            databases.insert("redis".to_string(), cfg);
+        }
+
         let it = RocketConfig::build(env)
             .address("0.0.0.0")
             .workers(self.http.workers)
@@ -67,7 +80,7 @@ impl Config {
                     .limit("forms", self.http.limits * (1 << 10 << 10))
                     .limit("json", self.http.limits * (1 << 10 << 10)),
             )
-            .extra("database", &self.database[..])
+            .extra("databases", databases)
             .extra(
                 "template_dir",
                 match self.http.templates().to_str() {
