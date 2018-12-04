@@ -1,6 +1,7 @@
 pub mod redis;
 
-use chrono::Duration;
+use std::time::Duration;
+
 use serde::{de::DeserializeOwned, ser::Serialize};
 
 use super::errors::Result;

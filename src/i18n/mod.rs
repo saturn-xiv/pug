@@ -1,5 +1,8 @@
 pub mod db;
 
+use std::ops::Deref;
+use std::time::Duration;
+
 use mustache;
 use rocket::{
     request::{self, FromRequest},
@@ -8,44 +11,57 @@ use rocket::{
 use serde::ser::Serialize;
 
 use super::{
+    cache::Cache,
     errors::{Error, Result},
-    orm::{Database, PooledConnection},
+    orm::{Database, PooledConnection as DbConnection},
+    redis::{PooledConnection as RedisConnection, Redis},
 };
 
-pub trait Provider {
-    fn get(&self, lang: &String, code: &String) -> Option<String>;
-    fn exist(&self, lang: &String) -> bool;
-}
+use self::db::Dao as I18nDao;
 
 pub struct I18n {
-    providers: Vec<Box<Provider>>,
+    db: DbConnection,
+    cache: RedisConnection,
 }
 
 impl I18n {
-    pub fn new(db: PooledConnection) -> Self {
-        Self {
-            providers: vec![Box::new(db)],
-        }
+    pub fn languages(&self) -> Result<Vec<String>> {
+        self.cache.get(
+            &"languages".to_string(),
+            Duration::from_secs(60 * 60 * 24 * 7),
+            || -> Result<Vec<String>> { self.db.deref().languages() },
+        )
     }
+
     pub fn exist(&self, lang: &String) -> bool {
-        for it in self.providers.iter() {
-            if it.exist(lang) {
-                return true;
-            }
+        if let Ok(items) = self.languages() {
+            return items.contains(lang);
         }
         false
     }
+
+    fn get(&self, lang: &String, code: &String) -> Result<Option<String>> {
+        self.cache.get(
+            &format!("locales.{}.{}", lang, code),
+            Duration::from_secs(60 * 60 * 24 * 7),
+            || -> Result<Option<String>> {
+                if let Ok(v) = self.db.deref().get(lang, code) {
+                    return Ok(Some(v));
+                }
+                Ok(None)
+            },
+        )
+    }
+
     pub fn tr<S: Serialize>(
         &self,
         lang: &String,
         code: &String,
         args: &Option<S>,
     ) -> Result<Option<String>> {
-        for it in self.providers.iter() {
-            if let Some(msg) = it.get(lang, code) {
-                let tpl = mustache::compile_str(&msg)?;
-                return Ok(Some(tpl.render_to_string(args)?));
-            }
+        if let Some(msg) = self.get(lang, code)? {
+            let tpl = mustache::compile_str(&msg)?;
+            return Ok(Some(tpl.render_to_string(args)?));
         }
         Ok(None)
     }
@@ -72,6 +88,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for I18n {
     type Error = ();
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
         let Database(db) = request.guard::<Database>()?;
-        Outcome::Success(I18n::new(db))
+        let Redis(cache) = request.guard::<Redis>()?;
+
+        Outcome::Success(I18n {
+            db: db,
+            cache: cache,
+        })
     }
 }

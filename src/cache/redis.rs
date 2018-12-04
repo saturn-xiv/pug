@@ -1,11 +1,11 @@
 use std::ops::Deref;
+use std::time::Duration;
 
-use chrono::Duration;
-use r2d2_redis::redis::{cmd, Connection};
+use r2d2_redis::redis::cmd;
 use serde::{de::DeserializeOwned, ser::Serialize};
 use serde_json;
 
-use super::super::errors::Result;
+use super::super::{errors::Result, redis::Connection};
 
 impl super::Cache for Connection {
     fn get<K, V, F>(&self, key: &K, ttl: Duration, fun: F) -> Result<V>
@@ -28,7 +28,7 @@ impl super::Cache for Connection {
                     .arg(&key)
                     .arg(serde_json::to_vec(&val)?.as_slice())
                     .arg("ex")
-                    .arg(ttl.num_seconds())
+                    .arg(ttl.as_secs())
                     .query(db)?;
                 Ok(val)
             }

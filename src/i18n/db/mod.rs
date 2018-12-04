@@ -5,8 +5,6 @@ mod postgresql;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 
-use std::ops::Deref;
-
 use chrono::{NaiveDateTime, Utc};
 use diesel::{insert_into, prelude::*, update};
 
@@ -21,7 +19,7 @@ use self::schema::locales;
 
 use super::super::{
     errors::Result,
-    orm::{schema::New as Schema, Connection, PooledConnection, ID},
+    orm::{schema::New as Schema, Connection, ID},
 };
 
 pub fn migration<'a>() -> Schema<'a> {
@@ -119,21 +117,5 @@ impl Dao for Connection {
             }
         }
         Ok(())
-    }
-}
-
-impl super::Provider for PooledConnection {
-    fn get(&self, lang: &String, code: &String) -> Option<String> {
-        if let Ok(v) = self.deref().get(lang, code) {
-            return Some(v);
-        }
-        None
-    }
-
-    fn exist(&self, lang: &String) -> bool {
-        if let Ok(c) = self.deref().count(lang) {
-            return c > 0;
-        }
-        false
     }
 }
