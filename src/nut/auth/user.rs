@@ -1,4 +1,5 @@
 use std::fmt;
+use std::net::IpAddr;
 
 use chrono::{NaiveDateTime, Utc};
 use diesel::{insert_into, prelude::*, update};
@@ -12,7 +13,7 @@ use super::super::super::{
 };
 use super::schema::users;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Type {
     Google,
     Facebook,
@@ -58,6 +59,29 @@ pub struct Item {
     pub updated_at: NaiveDateTime,
 }
 
+impl Item {
+    pub fn available(&self) -> Result<()> {
+        if let Some(_) = self.deleted_at {
+            return Err("your account is deleted".into());
+        }
+        if let Some(_) = self.locked_at {
+            return Err("your account is locked".into());
+        }
+        if None == self.confirmed_at {
+            return Err("your account isn't confirmed".into());
+        }
+        Ok(())
+    }
+    pub fn auth<E: Encryptor>(&self, password: &String) -> Result<()> {
+        if let Some(ref v) = self.password {
+            if E::verify(v, password.as_bytes()) {
+                return Ok(());
+            }
+        }
+        return Err("Bad password".into());
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "users"]
 pub struct New<'a> {
@@ -73,7 +97,9 @@ pub struct New<'a> {
 }
 
 pub trait Dao {
-    fn sign_in(&self, id: &ID, ip: &String) -> Result<()>;
+    fn by_uid(&self, uid: &String) -> Result<Item>;
+    fn by_email_or_nick_name(&self, id: &String) -> Result<Item>;
+    fn sign_in(&self, id: &ID, ip: &IpAddr) -> Result<()>;
     fn sign_up<T: Encryptor>(
         &self,
         real_name: &String,
@@ -90,8 +116,23 @@ pub trait Dao {
 }
 
 impl Dao for Connection {
-    fn sign_in(&self, id: &ID, ip: &String) -> Result<()> {
+    fn by_uid(&self, uid: &String) -> Result<Item> {
+        let it = users::dsl::users
+            .filter(users::dsl::uid.eq(uid))
+            .first(self)?;
+        Ok(it)
+    }
+
+    fn by_email_or_nick_name(&self, id: &String) -> Result<Item> {
+        let it = users::dsl::users
+            .filter(users::dsl::email.eq(id).or(users::dsl::nick_name.eq(id)))
+            .first(self)?;
+        Ok(it)
+    }
+
+    fn sign_in(&self, id: &ID, ip: &IpAddr) -> Result<()> {
         let now = Utc::now().naive_utc();
+        let ip = format!("{}", ip);
         let it = users::dsl::users.filter(users::dsl::id.eq(id));
         let (current_sign_in_at, current_sign_in_ip, sign_in_count) = users::dsl::users
             .select((

@@ -41,6 +41,7 @@ pub struct New<'a> {
 }
 
 pub trait Dao {
+    fn all(&self, user: &ID) -> Result<Vec<(Role, Option<String>)>>;
     fn can(&self, user: &ID, role: &Role, resource: &Option<String>) -> bool;
     fn deny(&self, user: &ID, role: &Role, resource: &Option<String>) -> Result<()>;
     fn apply(
@@ -54,6 +55,24 @@ pub trait Dao {
 }
 
 impl Dao for Connection {
+    fn all(&self, user: &ID) -> Result<Vec<(Role, Option<String>)>> {
+        let items = policies::dsl::policies
+            .filter(policies::dsl::user_id.eq(user))
+            .load::<Item>(self)?;
+        Ok(items
+            .iter()
+            .filter(|x| x.enable())
+            .map(|x| {
+                (
+                    x.role.parse().unwrap(),
+                    match x.resource {
+                        Some(ref v) => Some(v.clone()),
+                        None => None,
+                    },
+                )
+            })
+            .collect::<_>())
+    }
     fn can(&self, user: &ID, role: &Role, resource: &Option<String>) -> bool {
         let role = format!("{}", role);
         let it = match resource {
@@ -151,7 +170,7 @@ impl Dao for Connection {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum Role {
     Root,
     Admin,

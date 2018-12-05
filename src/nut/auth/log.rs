@@ -1,3 +1,5 @@
+use std::net::IpAddr;
+
 use chrono::NaiveDateTime;
 use diesel::{insert_into, prelude::*};
 
@@ -25,17 +27,18 @@ pub struct New<'a> {
 }
 
 pub trait Dao {
-    fn add(&self, user: &ID, ip: &String, message: &String) -> Result<()>;
+    fn add<S: Into<String>>(&self, user: &ID, ip: &IpAddr, message: S) -> Result<()>;
     fn all(&self, user: &ID, limit: i64) -> Result<Vec<Item>>;
 }
 
 impl Dao for Connection {
-    fn add(&self, user: &ID, ip: &String, message: &String) -> Result<()> {
+    fn add<S: Into<String>>(&self, user: &ID, ip: &IpAddr, message: S) -> Result<()> {
+        let ip = format!("{}", ip);
         insert_into(logs::dsl::logs)
             .values(&New {
                 user_id: user,
-                ip: ip,
-                message: message,
+                ip: &ip,
+                message: &message.into(),
             })
             .execute(self)?;
         Ok(())

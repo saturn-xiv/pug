@@ -1,8 +1,34 @@
+use std::net::SocketAddr;
+use std::ops::Deref;
+
+use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
 use validator::Validate;
 
-use super::super::super::errors::Result;
-use super::super::auth::log;
+use super::super::super::{
+    crypto::sodium::Encryptor as Sodium, errors::Result, jwt::Jwt, orm::Database,
+};
+use super::super::{
+    auth::{
+        log::{Dao as LogDao, Item as Log},
+        user::Dao as UserDao,
+    },
+    request::CurrentUser,
+};
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Token {
+    pub uid: String,
+    pub act: Action,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+pub enum Action {
+    SignIn,
+    Confirm,
+    Unlock,
+    ResetPassword,
+}
 
 #[derive(Debug, Validate, Deserialize)]
 pub struct SignIn {
@@ -13,10 +39,32 @@ pub struct SignIn {
 }
 
 #[post("/sign-in", format = "json", data = "<form>")]
-pub fn sign_in(form: Json<SignIn>) -> Result<JsonValue> {
+pub fn sign_in(
+    db: Database,
+    jwt: State<Jwt>,
+    remote: SocketAddr,
+    form: Json<SignIn>,
+) -> Result<JsonValue> {
     form.validate()?;
-    // TODO
-    Ok(json!({}))
+    let ip = remote.ip();
+    let db = db.deref();
+    let user = UserDao::by_email_or_nick_name(db, &form.id)?;
+
+    if let Err(e) = user.auth::<Sodium>(&form.password) {
+        LogDao::add(db, &user.id, &ip, "Sign in failed")?;
+        return Err(e);
+    }
+    user.available()?;
+    UserDao::sign_in(db, &user.id, &ip)?;
+    LogDao::add(db, &user.id, &ip, "Sign in success")?;
+    let token = jwt.sum(
+        None,
+        &Token {
+            uid: user.uid,
+            act: Action::SignIn,
+        },
+    )?;
+    Ok(json!({ "token": token }))
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -95,7 +143,7 @@ pub fn reset_password(form: Json<ResetPassword>) -> Result<JsonValue> {
 }
 
 #[get("/logs")]
-pub fn logs() -> Result<Json<Vec<log::Item>>> {
+pub fn logs() -> Result<Json<Vec<Log>>> {
     // TODO
     Ok(Json(Vec::new()))
 }
@@ -128,7 +176,9 @@ pub fn change_password(form: Json<ChangePassword>) -> Result<Json<()>> {
 }
 
 #[delete("/sign-out")]
-pub fn sign_out() -> Result<Json<()>> {
-    // TODO
+pub fn sign_out(db: Database, user: CurrentUser, remote: SocketAddr) -> Result<Json<()>> {
+    let db = db.deref();
+    let ip = remote.ip();
+    LogDao::add(db, &user.id, &ip, "Sign out")?;
     Ok(Json(()))
 }
