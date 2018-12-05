@@ -169,9 +169,19 @@ pub struct ChangePassword {
 }
 
 #[post("/change-password", format = "json", data = "<form>")]
-pub fn change_password(form: Json<ChangePassword>) -> Result<Json<()>> {
+pub fn change_password(
+    db: Database,
+    form: Json<ChangePassword>,
+    user: CurrentUser,
+    remote: SocketAddr,
+) -> Result<Json<()>> {
     form.validate()?;
-    // TODO
+    let db = db.deref();
+    let ip = remote.ip();
+    let user = UserDao::by_id(db, &user.id)?;
+    user.auth::<Sodium>(&form.current_password)?;
+    UserDao::password::<Sodium>(db, &user.id, &form.new_password)?;
+    LogDao::add(db, &user.id, &ip, "Change password")?;
     Ok(Json(()))
 }
 

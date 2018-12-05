@@ -97,6 +97,7 @@ pub struct New<'a> {
 }
 
 pub trait Dao {
+    fn by_id(&self, id: &ID) -> Result<Item>;
     fn by_uid(&self, uid: &String) -> Result<Item>;
     fn by_email_or_nick_name(&self, id: &String) -> Result<Item>;
     fn sign_in(&self, id: &ID, ip: &IpAddr) -> Result<()>;
@@ -116,6 +117,13 @@ pub trait Dao {
 }
 
 impl Dao for Connection {
+    fn by_id(&self, id: &ID) -> Result<Item> {
+        let it = users::dsl::users
+            .filter(users::dsl::id.eq(id))
+            .first(self)?;
+        Ok(it)
+    }
+
     fn by_uid(&self, uid: &String) -> Result<Item> {
         let it = users::dsl::users
             .filter(users::dsl::uid.eq(uid))
