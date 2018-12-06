@@ -43,7 +43,7 @@ tokio-io = "0.1"
 tokio-codec = "0.1"
 language-tags = "0.2"
 hyper = "0.10"
-rocket = "0.4.0-rc.2"
+rocket = "0.4"
 r2d2_redis = "0.8"
 zmq = "0.8"
 nix = "0.12"
@@ -79,6 +79,6 @@ optional = true
 features = ["bundled"]
 
 [dependencies.rocket_contrib]
-version = "0.4.0-rc.2"
+version = "0.4"
 default-features = false
 features = ["tera_templates", "json", "serve", "uuid", "redis_pool"]

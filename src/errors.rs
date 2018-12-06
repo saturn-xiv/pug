@@ -35,6 +35,7 @@ error_chain! {
         ZeroMq(zmq::Error);
         Nix(nix::Error);
         Redis(r2d2_redis::redis::RedisError);
+        RocketLaunch(rocket::error::LaunchError);
     }
 }
 
