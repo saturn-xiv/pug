@@ -18,6 +18,7 @@ use super::super::{
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Token {
     pub uid: String,
     pub act: Action,
@@ -34,6 +35,7 @@ pub enum Action {
 }
 
 #[derive(Debug, Validate, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignIn {
     #[validate(length(min = "1"))]
     pub id: String,
@@ -74,6 +76,7 @@ pub fn sign_in(
 }
 
 #[derive(Debug, Validate, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignUp {
     #[validate(length(min = "1", max = "32"))]
     pub real_name: String,
@@ -93,6 +96,7 @@ pub fn sign_up(form: Json<SignUp>) -> Result<JsonValue> {
 }
 
 #[derive(Debug, Validate, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Email {
     #[validate(email)]
     pub email: String,
@@ -134,6 +138,7 @@ pub fn forgot_password(form: Json<Email>) -> Result<JsonValue> {
 }
 
 #[derive(Debug, Validate, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ResetPassword {
     #[validate(length(min = "1"))]
     pub token: String,
@@ -168,6 +173,7 @@ pub fn post_profile() -> Result<Json<()>> {
 }
 
 #[derive(Debug, Validate, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ChangePassword {
     #[validate(length(min = "1"))]
     pub current_password: String,
