@@ -51,6 +51,8 @@ eui48 = "0.4"
 rust_sodium = "0.10"
 hex = "0.3"
 md5 = "0.6"
+git2 = "0.7"
+ssh2 = "0.3"
 mustache = "*"
 
 [dependencies.openssl-sys]
