@@ -133,7 +133,11 @@ impl Dao for Connection {
 
     fn by_email_or_nick_name(&self, id: &String) -> Result<Item> {
         let it = users::dsl::users
-            .filter(users::dsl::email.eq(id).or(users::dsl::nick_name.eq(id)))
+            .filter(
+                users::dsl::email
+                    .eq(&id.to_lowercase())
+                    .or(users::dsl::nick_name.eq(id)),
+            )
             .first(self)?;
         Ok(it)
     }
@@ -169,17 +173,18 @@ impl Dao for Connection {
         email: &String,
         password: &String,
     ) -> Result<()> {
+        let email = email.to_uppercase();
         insert_into(users::dsl::users)
             .values(&New {
                 real_name: real_name,
                 nick_name: nick_name,
-                email: email,
+                email: &email,
                 password: Some(&T::sum(password.as_bytes())?),
                 provider_type: &format!("{}", Type::Email),
-                provider_id: email,
+                provider_id: &email,
                 logo: &format!(
                     "https://www.gravatar.com/avatar/{}.jpg",
-                    gravatar_hash(email)
+                    gravatar_hash(&email)
                 ),
                 uid: &Uuid::new_v4().to_string(),
                 updated_at: &Utc::now().naive_utc(),

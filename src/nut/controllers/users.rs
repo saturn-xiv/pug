@@ -1,6 +1,7 @@
 use std::net::SocketAddr;
 use std::ops::Deref;
 
+use chrono::Duration;
 use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
 use validator::Validate;
@@ -20,6 +21,8 @@ use super::super::{
 pub struct Token {
     pub uid: String,
     pub act: Action,
+    pub nbf: i64,
+    pub exp: i64,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -34,7 +37,7 @@ pub enum Action {
 pub struct SignIn {
     #[validate(length(min = "1"))]
     pub id: String,
-    #[validate(length(min = "6"))]
+    #[validate(length(min = "1"))]
     pub password: String,
 }
 
@@ -57,11 +60,14 @@ pub fn sign_in(
     user.available()?;
     UserDao::sign_in(db, &user.id, &ip)?;
     LogDao::add(db, &user.id, &ip, "Sign in success")?;
+    let (nbf, exp) = Jwt::timestamps(Duration::weeks(1));
     let token = jwt.sum(
         None,
         &Token {
             uid: user.uid,
             act: Action::SignIn,
+            nbf: nbf,
+            exp: exp,
         },
     )?;
     Ok(json!({ "token": token }))
@@ -143,9 +149,10 @@ pub fn reset_password(form: Json<ResetPassword>) -> Result<JsonValue> {
 }
 
 #[get("/logs")]
-pub fn logs() -> Result<Json<Vec<Log>>> {
-    // TODO
-    Ok(Json(Vec::new()))
+pub fn logs(user: CurrentUser, db: Database) -> Result<Json<Vec<Log>>> {
+    let db = db.deref();
+    let items = LogDao::all(db, &user.id, 1 << 10)?;
+    Ok(Json(items))
 }
 
 #[get("/profile")]

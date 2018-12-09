@@ -2,12 +2,20 @@ use rocket::{http::Status, Catcher};
 
 pub fn catchers() -> Vec<Catcher> {
     catchers![
-        not_found,
+        non_authoritative_information,
         bad_request,
-        service_unavailable,
+        unauthorized,
         forbidden,
-        internal_server_error
+        not_found,
+        unprocessable_entity,
+        internal_server_error,
+        service_unavailable,
     ]
+}
+
+#[catch(203)]
+fn non_authoritative_information() -> &'static str {
+    Status::NonAuthoritativeInformation.reason
 }
 
 #[catch(400)]
@@ -15,14 +23,24 @@ fn bad_request() -> &'static str {
     Status::BadRequest.reason
 }
 
-#[catch(404)]
-fn not_found() -> &'static str {
-    Status::NotFound.reason
+#[catch(401)]
+fn unauthorized() -> &'static str {
+    Status::Unauthorized.reason
 }
 
 #[catch(403)]
 fn forbidden() -> &'static str {
     Status::Forbidden.reason
+}
+
+#[catch(404)]
+fn not_found() -> &'static str {
+    Status::NotFound.reason
+}
+
+#[catch(422)]
+fn unprocessable_entity() -> &'static str {
+    Status::UnprocessableEntity.reason
 }
 
 #[catch(500)]

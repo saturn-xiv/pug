@@ -63,7 +63,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for Token {
             .get_one(Authorization::<Bearer>::header_name())
         {
             if let Ok(auth) = auth.parse::<Bearer>() {
-                return Outcome::Success(Token(auth.token));
+                let header = "Bearer ";
+                return Outcome::Success(Token(auth.token[header.len()..].to_string()));
             }
         }
         Outcome::Failure((Status::NonAuthoritativeInformation, ()))
@@ -154,6 +155,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for CurrentUser {
         let db = db.deref();
         let jwt = req.guard::<State<Jwt>>()?;
         let jwt = jwt.deref();
+
         if let Ok(token) = jwt.parse::<controllers::users::Token>(&token) {
             let token = token.claims;
             if token.act == controllers::users::Action::SignIn {
