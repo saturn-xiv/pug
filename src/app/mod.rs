@@ -1,6 +1,5 @@
 pub mod database;
 pub mod generate;
-pub mod http;
 
 use std::result::Result as StdResult;
 

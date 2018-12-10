@@ -22,7 +22,7 @@ use super::super::{
     orm::{schema::New as Schema, Connection, ID},
 };
 
-pub fn migration<'a>() -> Schema<'a> {
+pub fn migrations<'a>() -> Schema<'a> {
     Schema {
         version: "20181123203749148443617",
         name: "create-locales",

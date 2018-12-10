@@ -18,7 +18,7 @@ pub use self::sqlite::*;
 
 use super::super::orm::schema::New as Schema;
 
-pub fn migration<'a>() -> Schema<'a> {
+pub fn migrations<'a>() -> Schema<'a> {
     Schema {
         version: "20181202020324964361900",
         name: "create-nut-auth",

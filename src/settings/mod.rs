@@ -25,7 +25,7 @@ pub use self::sqlite::*;
 
 use self::schema::settings;
 
-pub fn migration<'a>() -> Schema<'a> {
+pub fn migrations<'a>() -> Schema<'a> {
     Schema {
         version: "20181123203833948693021",
         name: "create-settings",

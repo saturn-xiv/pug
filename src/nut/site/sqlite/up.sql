@@ -59,3 +59,26 @@ CREATE TABLE votes(
 );
 CREATE INDEX idx_votes_resource_type ON votes(resource_type);
 CREATE UNIQUE INDEX idx_votes_resource ON votes(resource_type, resource_id);
+
+CREATE TABLE tags(
+  id INTEGER PRIMARY KEY NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  icon VARCHAR(16) NOT NULL,
+  color VARCHAR(16) NOT NULL,
+  font VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL
+);
+CREATE UNIQUE INDEX idx_tags_name ON tags(name);
+
+CREATE TABLE categories(
+  id INTEGER PRIMARY KEY NOT NULL,
+  parent_id INTEGER,
+  name VARCHAR(255) NOT NULL,
+  icon VARCHAR(16) NOT NULL,
+  color VARCHAR(16) NOT NULL,
+  font VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL
+);
+CREATE INDEX idx_categories_name ON categories(name);
