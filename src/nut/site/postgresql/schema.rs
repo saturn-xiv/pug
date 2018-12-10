@@ -16,6 +16,19 @@ table! {
 }
 
 table! {
+    categories (id) {
+        id -> Int8,
+        parent_id -> Nullable<Int8>,
+        name -> Varchar,
+        icon -> Varchar,
+        color -> Varchar,
+        font -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     friend_links (id) {
         id -> Int8,
         title -> Varchar,
@@ -53,6 +66,18 @@ table! {
 }
 
 table! {
+    tags (id) {
+        id -> Int8,
+        name -> Varchar,
+        icon -> Varchar,
+        color -> Varchar,
+        font -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     votes (id) {
         id -> Int8,
         point -> Int8,
@@ -65,8 +90,10 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     cards,
+    categories,
     friend_links,
     leave_words,
     links,
+    tags,
     votes,
 );

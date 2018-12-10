@@ -8,10 +8,10 @@ fn it_migrations() {
     pug::app::database::migrate::run(
         &db,
         &vec![
-            pug::settings::migration(),
-            pug::i18n::locales::migration(),
-            pug::nut::auth::migration(),
-            pug::nut::site::migration(),
+            pug::settings::migrations(),
+            pug::i18n::db::migrations(),
+            pug::nut::auth::migrations(),
+            pug::nut::site::migrations(),
         ],
     )
     .unwrap();

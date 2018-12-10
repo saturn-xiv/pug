@@ -16,6 +16,19 @@ table! {
 }
 
 table! {
+    categories (id) {
+        id -> Integer,
+        parent_id -> Nullable<Integer>,
+        name -> Text,
+        icon -> Text,
+        color -> Text,
+        font -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     friend_links (id) {
         id -> Integer,
         title -> Text,
@@ -53,6 +66,18 @@ table! {
 }
 
 table! {
+    tags (id) {
+        id -> Integer,
+        name -> Text,
+        icon -> Text,
+        color -> Text,
+        font -> Text,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+table! {
     votes (id) {
         id -> Integer,
         point -> BigInt,
@@ -65,8 +90,10 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     cards,
+    categories,
     friend_links,
     leave_words,
     links,
+    tags,
     votes,
 );
