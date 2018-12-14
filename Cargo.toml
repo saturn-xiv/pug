@@ -19,7 +19,6 @@ log = "0.4"
 log4rs = "0.8"
 error-chain = "0.12"
 lazy_static = "1.0"
-chrono-tz = "0.5"
 serde = "1"
 serde_derive = "1"
 jsonwebtoken = "5"
@@ -61,6 +60,10 @@ features = ["vendored"]
 
 [dependencies.chrono]
 version = "0.4"
+features = ["serde"]
+
+[dependencies.chrono-tz]
+version = "0.5"
 features = ["serde"]
 
 [dependencies.url]

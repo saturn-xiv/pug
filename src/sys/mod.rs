@@ -1,5 +1,6 @@
 pub mod git;
 pub mod network;
+pub mod timezone;
 
 use std::process;
 
