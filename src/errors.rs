@@ -14,6 +14,7 @@ error_chain! {
         StdStrUtf8(std::str::Utf8Error);
         StdNumParseInt(std::num::ParseIntError);
         StdStringFromUtf8(std::string::FromUtf8Error);
+        NetAddrParse(std::net::AddrParseError);
 
         Log4rs(log4rs::Error);
         JsonWebToken(jsonwebtoken::errors::Error);
