@@ -99,7 +99,8 @@ pub struct New<'a> {
 pub trait Dao {
     fn by_id(&self, id: &ID) -> Result<Item>;
     fn by_uid(&self, uid: &String) -> Result<Item>;
-    fn by_email_or_nick_name(&self, id: &String) -> Result<Item>;
+    fn by_email(&self, email: &String) -> Result<Item>;
+    fn by_nick_name(&self, nick_name: &String) -> Result<Item>;
     fn sign_in(&self, id: &ID, ip: &IpAddr) -> Result<()>;
     fn sign_up<T: Encryptor>(
         &self,
@@ -110,9 +111,8 @@ pub trait Dao {
     ) -> Result<()>;
     fn lock(&self, id: &ID, on: bool) -> Result<()>;
     fn confirm(&self, id: &ID) -> Result<()>;
+    fn unlock(&self, id: &ID) -> Result<()>;
     fn count(&self) -> Result<i64>;
-    fn is_email_exist(&self, email: &String) -> Result<bool>;
-    fn is_nick_name_exist(&self, nick_name: &String) -> Result<bool>;
     fn password<T: Encryptor>(&self, id: &ID, password: &String) -> Result<()>;
 }
 
@@ -131,13 +131,16 @@ impl Dao for Connection {
         Ok(it)
     }
 
-    fn by_email_or_nick_name(&self, id: &String) -> Result<Item> {
+    fn by_email(&self, email: &String) -> Result<Item> {
         let it = users::dsl::users
-            .filter(
-                users::dsl::email
-                    .eq(&id.to_lowercase())
-                    .or(users::dsl::nick_name.eq(id)),
-            )
+            .filter(users::dsl::email.eq(&email.to_lowercase()))
+            .first(self)?;
+        Ok(it)
+    }
+
+    fn by_nick_name(&self, nick_name: &String) -> Result<Item> {
+        let it = users::dsl::users
+            .filter(users::dsl::nick_name.eq(nick_name))
             .first(self)?;
         Ok(it)
     }
@@ -173,7 +176,7 @@ impl Dao for Connection {
         email: &String,
         password: &String,
     ) -> Result<()> {
-        let email = email.to_uppercase();
+        let email = email.to_lowercase();
         insert_into(users::dsl::users)
             .values(&New {
                 real_name: real_name,
@@ -217,25 +220,21 @@ impl Dao for Connection {
         Ok(())
     }
 
+    fn unlock(&self, id: &ID) -> Result<()> {
+        let now = Utc::now().naive_utc();
+        let it = users::dsl::users.filter(users::dsl::id.eq(id));
+        update(it)
+            .set((
+                users::dsl::locked_at.eq(&None::<NaiveDateTime>),
+                users::dsl::updated_at.eq(&now),
+            ))
+            .execute(self)?;
+        Ok(())
+    }
+
     fn count(&self) -> Result<i64> {
         let cnt: i64 = users::dsl::users.count().get_result(self)?;
         Ok(cnt)
-    }
-
-    fn is_email_exist(&self, email: &String) -> Result<bool> {
-        let cnt: i64 = users::dsl::users
-            .filter(users::dsl::email.eq(email))
-            .count()
-            .get_result(self)?;
-        Ok(cnt > 0)
-    }
-
-    fn is_nick_name_exist(&self, nick_name: &String) -> Result<bool> {
-        let cnt: i64 = users::dsl::users
-            .filter(users::dsl::nick_name.eq(nick_name))
-            .count()
-            .get_result(self)?;
-        Ok(cnt > 0)
     }
 
     fn password<T: Encryptor>(&self, id: &ID, password: &String) -> Result<()> {

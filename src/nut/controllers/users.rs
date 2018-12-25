@@ -1,7 +1,8 @@
 use std::net::SocketAddr;
 use std::ops::Deref;
 
-use chrono::Duration;
+use chrono::{Duration, Utc};
+use diesel::{prelude::*, update};
 use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
 use validator::Validate;
@@ -12,7 +13,8 @@ use super::super::super::{
 use super::super::{
     auth::{
         log::{Dao as LogDao, Item as Log},
-        user::Dao as UserDao,
+        schema::users,
+        user::{Dao as UserDao, Item as User},
     },
     request::CurrentUser,
 };
@@ -53,7 +55,14 @@ pub fn sign_in(
     form.validate()?;
     let ip = remote.ip();
     let db = db.deref();
-    let user = UserDao::by_email_or_nick_name(db, &form.id)?;
+    let user: Result<User> = match UserDao::by_email(db, &form.id) {
+        Ok(v) => Ok(v),
+        Err(_) => match UserDao::by_nick_name(db, &form.id) {
+            Ok(v) => Ok(v),
+            Err(_) => Err(format!("User {} not exist", form.id).into()),
+        },
+    };
+    let user = user?;
 
     if let Err(e) = user.auth::<Sodium>(&form.password) {
         LogDao::add(db, &user.id, &ip, "Sign in failed")?;
@@ -89,9 +98,27 @@ pub struct SignUp {
 }
 
 #[post("/sign-up", format = "json", data = "<form>")]
-pub fn sign_up(form: Json<SignUp>) -> Result<JsonValue> {
+pub fn sign_up(form: Json<SignUp>, db: Database, remote: SocketAddr) -> Result<JsonValue> {
     form.validate()?;
-    // TODO
+    let db = db.deref();
+    let ip = remote.ip();
+
+    if let Ok(_) = UserDao::by_email(db, &form.email) {
+        return Err(format!("Email {} already exist", form.email).into());
+    }
+    if let Ok(_) = UserDao::by_nick_name(db, &form.nick_name) {
+        return Err(format!("Nick name {} already exist", form.nick_name).into());
+    }
+    UserDao::sign_up::<Sodium>(
+        db,
+        &form.real_name,
+        &form.nick_name,
+        &form.email,
+        &form.password,
+    )?;
+    let it = UserDao::by_email(db, &form.email)?;
+    LogDao::add(db, &it.id, &ip, "Sign up")?;
+    send_email(&it, &Action::Confirm)?;
     Ok(json!({}))
 }
 
@@ -103,37 +130,81 @@ pub struct Email {
 }
 
 #[post("/confirm", format = "json", data = "<form>")]
-pub fn confirm(form: Json<Email>) -> Result<JsonValue> {
+pub fn confirm(form: Json<Email>, db: Database) -> Result<JsonValue> {
     form.validate()?;
-    // TODO
+    let db = db.deref();
+    let it = UserDao::by_email(db, &form.email)?;
+    if let Some(_) = it.confirmed_at {
+        return Err("User already confirmed".into());
+    }
+    send_email(&it, &Action::Confirm)?;
     Ok(json!({}))
 }
 
 #[put("/confirm/<token>")]
-pub fn confirm_token(token: String) -> Result<JsonValue> {
-    // TODO
-    debug!("confirm {}", token);
+pub fn confirm_token(
+    token: String,
+    remote: SocketAddr,
+    db: Database,
+    jwt: State<Jwt>,
+) -> Result<JsonValue> {
+    let token = jwt.parse::<Token>(&token)?.claims;
+    if token.act != Action::Confirm {
+        return Err("bad action".into());
+    }
+
+    let db = db.deref();
+    let ip = remote.ip();
+    let it = UserDao::by_uid(db, &token.uid)?;
+    if let Some(_) = it.confirmed_at {
+        return Err("User already confirmed".into());
+    }
+    UserDao::confirm(db, &it.id)?;
+    LogDao::add(db, &it.id, &ip, "Confirmed")?;
     Ok(json!({}))
 }
 
 #[post("/unlock", format = "json", data = "<form>")]
-pub fn unlock(form: Json<Email>) -> Result<JsonValue> {
+pub fn unlock(form: Json<Email>, db: Database) -> Result<JsonValue> {
     form.validate()?;
-    // TODO
+    let db = db.deref();
+    let it = UserDao::by_email(db, &form.email)?;
+    if None == it.locked_at {
+        return Err("User isn't locked".into());
+    }
+    send_email(&it, &Action::Unlock)?;
     Ok(json!({}))
 }
 
 #[put("/unlock/<token>")]
-pub fn unlock_token(token: String) -> Result<JsonValue> {
-    // TODO
-    debug!("unlock {}", token);
+pub fn unlock_token(
+    token: String,
+    remote: SocketAddr,
+    db: Database,
+    jwt: State<Jwt>,
+) -> Result<JsonValue> {
+    let token = jwt.parse::<Token>(&token)?.claims;
+    if token.act != Action::Unlock {
+        return Err("bad action".into());
+    }
+
+    let db = db.deref();
+    let ip = remote.ip();
+    let it = UserDao::by_uid(db, &token.uid)?;
+    if None == it.locked_at {
+        return Err("User already isn't locked".into());
+    }
+    UserDao::unlock(db, &it.id)?;
+    LogDao::add(db, &it.id, &ip, "Unlock")?;
     Ok(json!({}))
 }
 
 #[post("/forgot-password", format = "json", data = "<form>")]
-pub fn forgot_password(form: Json<Email>) -> Result<JsonValue> {
+pub fn forgot_password(form: Json<Email>, db: Database) -> Result<JsonValue> {
     form.validate()?;
-    // TODO
+    let db = db.deref();
+    let it = UserDao::by_uid(db, &form.email)?;
+    send_email(&it, &Action::ResetPassword)?;
     Ok(json!({}))
 }
 
@@ -147,9 +218,24 @@ pub struct ResetPassword {
 }
 
 #[post("/reset-password", format = "json", data = "<form>")]
-pub fn reset_password(form: Json<ResetPassword>) -> Result<JsonValue> {
+pub fn reset_password(
+    form: Json<ResetPassword>,
+    remote: SocketAddr,
+    db: Database,
+    jwt: State<Jwt>,
+) -> Result<JsonValue> {
     form.validate()?;
-    // TODO
+    let token = jwt.parse::<Token>(&form.token)?.claims;
+    if token.act != Action::ResetPassword {
+        return Err("bad action".into());
+    }
+
+    let db = db.deref();
+    let ip = remote.ip();
+    let it = UserDao::by_uid(db, &token.uid)?;
+
+    UserDao::password::<Sodium>(db, &it.id, &form.password)?;
+    LogDao::add(db, &it.id, &ip, "Reset password")?;
     Ok(json!({}))
 }
 
@@ -161,14 +247,36 @@ pub fn logs(user: CurrentUser, db: Database) -> Result<Json<Vec<Log>>> {
 }
 
 #[get("/profile")]
-pub fn get_profile() -> Result<Json<()>> {
-    // TODO
-    Ok(Json(()))
+pub fn get_profile(user: CurrentUser, db: Database) -> Result<JsonValue> {
+    let db = db.deref();
+    let it = UserDao::by_id(db, &user.id)?;
+    Ok(
+        json!({"email":it.email, "nick_name":it.nick_name, "real_name":it.real_name, "logo":it.logo}),
+    )
 }
 
-#[post("/profile")]
-pub fn post_profile() -> Result<Json<()>> {
-    // TODO
+#[derive(Debug, Validate, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Profile {
+    #[validate(length(min = "1"))]
+    pub real_name: String,
+    #[validate(length(min = "1"))]
+    pub logo: String,
+}
+
+#[post("/profile", format = "json", data = "<form>")]
+pub fn post_profile(user: CurrentUser, form: Json<Profile>, db: Database) -> Result<Json<()>> {
+    let db = db.deref();
+    let now = Utc::now().naive_utc();
+    let it = users::dsl::users.filter(users::dsl::id.eq(&user.id));
+    update(it)
+        .set((
+            users::dsl::real_name.eq(&form.real_name),
+            users::dsl::logo.eq(&form.logo),
+            users::dsl::updated_at.eq(&now),
+        ))
+        .execute(db)?;
+
     Ok(Json(()))
 }
 
@@ -204,4 +312,8 @@ pub fn sign_out(db: Database, user: CurrentUser, remote: SocketAddr) -> Result<J
     let ip = remote.ip();
     LogDao::add(db, &user.id, &ip, "Sign out")?;
     Ok(Json(()))
+}
+
+fn send_email(user: &User, act: &Action) -> Result<()> {
+    Ok(())
 }

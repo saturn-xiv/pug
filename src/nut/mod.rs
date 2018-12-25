@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod catchers;
 pub mod controllers;
+pub mod queue;
 pub mod request;
 pub mod seo;
 pub mod site;
