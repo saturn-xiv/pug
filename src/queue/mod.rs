@@ -2,15 +2,20 @@ pub mod rabbitmq;
 pub mod redis;
 pub mod zeromq;
 
-use std::collections::HashMap;
-
-use super::errors::Result;
+use std::result::Result;
 
 pub trait Queue {
-    fn publish(&self, name: String, payload: Vec<u8>) -> Result<()>;
-    fn consumer(&self, name: String, handlers: HashMap<String, Box<Handler>>) -> Result<()>;
+    type Error;
+    fn publish(&self, name: String, id: String, payload: Vec<u8>) -> Result<(), Self::Error>;
+    fn consume(
+        &self,
+        consumer: String,
+        queue: String,
+        handler: Box<Handler<Error = Self::Error>>,
+    ) -> Result<(), Self::Error>;
 }
 
-pub trait Handler {
-    fn handle(&self, id: String, payload: Vec<u8>) -> Result<()>;
+pub trait Handler: Sync + Send {
+    type Error;
+    fn handle(&self, id: String, payload: Vec<u8>) -> Result<(), Self::Error>;
 }
