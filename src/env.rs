@@ -10,6 +10,7 @@ use super::{
     crypto::{self, Encryptor},
     errors::Result,
     oauth::Config as OauthConfig,
+    queue::rabbitmq::{Config as RabbitMQConfig, RabbitMQ},
 };
 
 pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -20,7 +21,7 @@ pub struct Config {
     pub secrets: String,
     pub database: String,
     pub redis: Option<String>,
-    pub rabbitmq: Option<String>,
+    pub rabbitmq: Option<RabbitMQConfig>,
     pub http: Http,
     pub oauth: Option<OauthConfig>,
 }
@@ -38,7 +39,7 @@ impl Default for Config {
             database: "mysql://root:@localhost:3306/pug".to_string(),
             #[cfg(feature = "postgresql")]
             database: "postgres://postgres:@localhost:5432/pug".to_string(),
-            rabbitmq: Some("rabbitmq://".to_string()),
+            rabbitmq: Some(RabbitMQConfig::default()),
             oauth: None,
         }
     }
@@ -111,6 +112,13 @@ impl Config {
                 Ok(pool)
             }
             None => Err("please setup redis url".into()),
+        }
+    }
+
+    pub fn rabbitmq(&self) -> Result<RabbitMQ> {
+        match self.rabbitmq {
+            Some(ref c) => c.clone().open(),
+            None => Err("please setup rabbitmq".into()),
         }
     }
 

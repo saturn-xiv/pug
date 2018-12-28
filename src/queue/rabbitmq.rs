@@ -1,16 +1,56 @@
 use std::net::SocketAddr;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use failure::Error as FailureError;
 use futures::{future::Future, Stream};
-use lapin::channel::{
-    BasicConsumeOptions, BasicGetOptions, BasicProperties, BasicPublishOptions,
-    ConfirmSelectOptions, QueueDeclareOptions,
+use lapin::{
+    channel::{
+        BasicConsumeOptions, BasicGetOptions, BasicProperties, BasicPublishOptions,
+        ConfirmSelectOptions, QueueDeclareOptions,
+    },
+    client::ConnectionOptions,
+    message::Delivery,
+    types::FieldTable,
 };
-use lapin::{client::ConnectionOptions, types::FieldTable};
+use mime::{Mime, APPLICATION_JSON};
+use serde::ser::Serialize;
+use serde_json;
 use tokio::{net::TcpStream, runtime::Runtime};
 
-use super::super::errors::{Error, Result};
+use super::super::errors::Result;
 use super::{Handler, Queue};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Config {
+    pub host: String,
+    pub port: u16,
+    pub username: String,
+    pub password: String,
+    pub virtual_host: String,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            host: "localhost".to_string(),
+            port: 5672,
+            username: "guest".to_string(),
+            password: "guest".to_string(),
+            virtual_host: "/".to_string(),
+        }
+    }
+}
+
+impl Config {
+    pub fn open(self) -> Result<RabbitMQ> {
+        RabbitMQ::new(
+            format!("{}:{}", self.host, self.port),
+            self.username,
+            self.password,
+            self.virtual_host,
+        )
+    }
+}
 
 pub struct RabbitMQ {
     addr: SocketAddr,
@@ -32,9 +72,10 @@ impl RabbitMQ {
     }
 }
 impl Queue for RabbitMQ {
-    type Error = Error;
-    fn publish(&self, queue: String, mid: String, payload: Vec<u8>) -> Result<()> {
+    fn publish<T: Serialize>(&self, queue: String, mid: String, payload: T) -> Result<()> {
+        info!("publish task {}", mid);
         let options = self.options.clone();
+        let payload = serde_json::to_vec(&payload)?;
 
         let rt = TcpStream::connect(&self.addr)
             .map_err(FailureError::from)
@@ -64,7 +105,15 @@ impl Queue for RabbitMQ {
                                         &queue,
                                         payload,
                                         BasicPublishOptions::default(),
-                                        BasicProperties::default().with_message_id(mid),
+                                        BasicProperties::default()
+                                            .with_message_id(mid)
+                                            .with_content_type(format!("{}", APPLICATION_JSON))
+                                            .with_timestamp(
+                                                SystemTime::now()
+                                                    .duration_since(UNIX_EPOCH)
+                                                    .expect("get timestamp")
+                                                    .as_secs(),
+                                            ),
                                     )
                                     .map(|confirmation| {
                                         info!("publish got confirmation: {:?}", confirmation)
@@ -88,7 +137,7 @@ impl Queue for RabbitMQ {
         &self,
         consumer_name: String,
         queue_name: String,
-        handler: Box<Handler<Error = Self::Error>>,
+        handler: Box<Handler>,
     ) -> Result<()> {
         let options = self.options.clone();
 
@@ -139,18 +188,11 @@ impl Queue for RabbitMQ {
                             .and_then(|stream| {
                                 info!("got consumer stream");
                                 stream.for_each(move |message| {
-                                    debug!("got message: {:?}", message);
-                                    match message.properties.message_id() {
-                                        Some(id) => {
-                                            if let Err(e) =
-                                                handler.handle(id.to_string(), message.data)
-                                            {
-                                                error!("failed on process message {:?}", e);
-                                            }
-                                        }
-                                        None => error!("bad message"),
-                                    };
-                                    c.basic_ack(message.delivery_tag, false)
+                                    let tag = message.delivery_tag;
+                                    if let Err(e) = handle_message(message, &handler) {
+                                        error!("failed to handle message: {:?}", e);
+                                    }
+                                    c.basic_ack(tag, false)
                                 })
                             })
                     })
@@ -162,4 +204,28 @@ impl Queue for RabbitMQ {
             Err(e) => Err(format!("failed on consume message: {:?}", e).into()),
         }
     }
+}
+
+pub fn handle_message(msg: Delivery, hnd: &Box<Handler>) -> Result<()> {
+    debug!("got message: {:?}", msg);
+
+    let ct: Result<()> = match msg.properties.content_type() {
+        Some(v) => {
+            if v.parse::<Mime>()? == APPLICATION_JSON {
+                Ok(())
+            } else {
+                Err(format!("bad message content type {}", v).into())
+            }
+        }
+        None => Err("empty message id".into()),
+    };
+    ct?;
+
+    let id: Result<String> = match msg.properties.message_id() {
+        Some(v) => Ok(v.to_string()),
+        None => Err("empty message id".into()),
+    };
+    let id = id?;
+    info!("consume message {}", id);
+    hnd.handle(id, msg.data)
 }

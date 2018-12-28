@@ -38,6 +38,7 @@ error_chain! {
         Redis(r2d2_redis::redis::RedisError);
         RocketLaunch(rocket::error::LaunchError);
         Git2(git2::Error);
+        MimeFormStr(mime::FromStrError);
     }
 }
 

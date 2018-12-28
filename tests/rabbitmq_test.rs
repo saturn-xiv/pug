@@ -1,22 +1,31 @@
 extern crate env_logger;
 extern crate pug;
+extern crate serde;
+extern crate serde_json;
 extern crate uuid;
+#[macro_use]
+extern crate serde_derive;
 
 use std::thread;
 use std::time::Duration;
 
 use pug::{
-    errors::{Error, Result},
+    errors::Result,
     queue::{rabbitmq::RabbitMQ, Handler, Queue},
 };
 use uuid::Uuid;
 
+#[derive(Debug, Serialize, Deserialize)]
+struct Task {
+    message: String,
+}
+
 struct Echo;
 
 impl Handler for Echo {
-    type Error = Error;
     fn handle(&self, id: String, payload: Vec<u8>) -> Result<()> {
-        println!("receive message {} {}", id, String::from_utf8(payload)?);
+        let it: Task = serde_json::from_slice(&payload)?;
+        println!("receive message {} {:?}", id, it);
         Ok(())
     }
 }
@@ -38,7 +47,9 @@ fn it_rabbitmq() {
         mq.publish(
             queue.to_string(),
             Uuid::new_v4().to_string(),
-            format!("hello, {} pug!", i).as_bytes().to_vec(),
+            Task {
+                message: format!("hello, {} pug!", i),
+            },
         )
         .unwrap();
     }

@@ -1,3 +1,4 @@
+use std::fmt;
 use std::net::SocketAddr;
 use std::ops::Deref;
 
@@ -5,10 +6,16 @@ use chrono::{Duration, Utc};
 use diesel::{prelude::*, update};
 use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
+use uuid::Uuid;
 use validator::Validate;
 
 use super::super::super::{
-    crypto::sodium::Encryptor as Sodium, errors::Result, jwt::Jwt, orm::Database,
+    crypto::sodium::Encryptor as Sodium,
+    errors::Result,
+    i18n::I18n,
+    jwt::Jwt,
+    orm::Database,
+    queue::{rabbitmq::RabbitMQ, Queue},
 };
 use super::super::{
     auth::{
@@ -16,7 +23,8 @@ use super::super::{
         schema::users,
         user::{Dao as UserDao, Item as User},
     },
-    request::CurrentUser,
+    request::{CurrentUser, Host, Locale},
+    tasks::send_email,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -34,6 +42,17 @@ pub enum Action {
     Confirm,
     Unlock,
     ResetPassword,
+}
+
+impl fmt::Display for Action {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Action::SignIn => fmt.write_str("sign-in"),
+            Action::Confirm => fmt.write_str("confirm"),
+            Action::Unlock => fmt.write_str("unlock"),
+            Action::ResetPassword => fmt.write_str("reset-password"),
+        }
+    }
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -98,10 +117,22 @@ pub struct SignUp {
 }
 
 #[post("/sign-up", format = "json", data = "<form>")]
-pub fn sign_up(form: Json<SignUp>, db: Database, remote: SocketAddr) -> Result<JsonValue> {
+pub fn sign_up(
+    form: Json<SignUp>,
+    queue: State<RabbitMQ>,
+    db: Database,
+    jwt: State<Jwt>,
+    remote: SocketAddr,
+    host: Host,
+    locale: Locale,
+    i18n: I18n,
+) -> Result<JsonValue> {
     form.validate()?;
     let db = db.deref();
+    let queue = queue.deref();
     let ip = remote.ip();
+    let Locale(locale) = locale;
+    let jwt = jwt.deref();
 
     if let Ok(_) = UserDao::by_email(db, &form.email) {
         return Err(format!("Email {} already exist", form.email).into());
@@ -118,7 +149,15 @@ pub fn sign_up(form: Json<SignUp>, db: Database, remote: SocketAddr) -> Result<J
     )?;
     let it = UserDao::by_email(db, &form.email)?;
     LogDao::add(db, &it.id, &ip, "Sign up")?;
-    send_email(&it, &Action::Confirm)?;
+    send_email(
+        &i18n,
+        jwt,
+        queue,
+        &it,
+        &Action::Confirm,
+        &locale,
+        &host.hostname,
+    )?;
     Ok(json!({}))
 }
 
@@ -130,14 +169,34 @@ pub struct Email {
 }
 
 #[post("/confirm", format = "json", data = "<form>")]
-pub fn confirm(form: Json<Email>, db: Database) -> Result<JsonValue> {
+pub fn confirm(
+    form: Json<Email>,
+    host: Host,
+    locale: Locale,
+    queue: State<RabbitMQ>,
+    db: Database,
+    jwt: State<Jwt>,
+    i18n: I18n,
+) -> Result<JsonValue> {
     form.validate()?;
     let db = db.deref();
+    let queue = queue.deref();
+    let jwt = jwt.deref();
+
+    let Locale(locale) = locale;
     let it = UserDao::by_email(db, &form.email)?;
     if let Some(_) = it.confirmed_at {
         return Err("User already confirmed".into());
     }
-    send_email(&it, &Action::Confirm)?;
+    send_email(
+        &i18n,
+        jwt,
+        queue,
+        &it,
+        &Action::Confirm,
+        &locale,
+        &host.hostname,
+    )?;
     Ok(json!({}))
 }
 
@@ -165,14 +224,33 @@ pub fn confirm_token(
 }
 
 #[post("/unlock", format = "json", data = "<form>")]
-pub fn unlock(form: Json<Email>, db: Database) -> Result<JsonValue> {
+pub fn unlock(
+    form: Json<Email>,
+    host: Host,
+    locale: Locale,
+    queue: State<RabbitMQ>,
+    i18n: I18n,
+    db: Database,
+    jwt: State<Jwt>,
+) -> Result<JsonValue> {
     form.validate()?;
     let db = db.deref();
+    let queue = queue.deref();
+    let jwt = jwt.deref();
+    let Locale(locale) = locale;
     let it = UserDao::by_email(db, &form.email)?;
     if None == it.locked_at {
         return Err("User isn't locked".into());
     }
-    send_email(&it, &Action::Unlock)?;
+    send_email(
+        &i18n,
+        jwt,
+        queue,
+        &it,
+        &Action::Unlock,
+        &locale,
+        &host.hostname,
+    )?;
     Ok(json!({}))
 }
 
@@ -200,11 +278,30 @@ pub fn unlock_token(
 }
 
 #[post("/forgot-password", format = "json", data = "<form>")]
-pub fn forgot_password(form: Json<Email>, db: Database) -> Result<JsonValue> {
+pub fn forgot_password(
+    form: Json<Email>,
+    queue: State<RabbitMQ>,
+    host: Host,
+    locale: Locale,
+    db: Database,
+    i18n: I18n,
+    jwt: State<Jwt>,
+) -> Result<JsonValue> {
     form.validate()?;
     let db = db.deref();
+    let queue = queue.deref();
+    let jwt = jwt.deref();
+    let Locale(locale) = locale;
     let it = UserDao::by_uid(db, &form.email)?;
-    send_email(&it, &Action::ResetPassword)?;
+    send_email(
+        &i18n,
+        jwt,
+        queue,
+        &it,
+        &Action::ResetPassword,
+        &locale,
+        &host.hostname,
+    )?;
     Ok(json!({}))
 }
 
@@ -314,6 +411,45 @@ pub fn sign_out(db: Database, user: CurrentUser, remote: SocketAddr) -> Result<J
     Ok(Json(()))
 }
 
-fn send_email(user: &User, act: &Action) -> Result<()> {
+fn send_email(
+    i18n: &I18n,
+    jwt: &Jwt,
+    queue: &RabbitMQ,
+    user: &User,
+    act: &Action,
+    locale: &String,
+    host: &String,
+) -> Result<()> {
+    let expire = 1;
+    let (nbf, exp) = Jwt::timestamps(Duration::hours(expire));
+    let token = jwt.sum(
+        None,
+        &Token {
+            uid: user.uid.clone(),
+            act: act.clone(),
+            nbf: nbf,
+            exp: exp,
+        },
+    )?;
+    let subject = i18n.t(
+        locale,
+        &format!("nut.emails.users.{}.subject", act),
+        &Some(json!({})),
+    );
+    let body = i18n.t(
+        locale,
+        &format!("nut.emails.users.{}.body", act),
+        &Some(json!({ "host": host, "expire":expire, "token":token })),
+    );
+
+    queue.publish(
+        send_email::NAME.to_string(),
+        Uuid::new_v4().to_string(),
+        send_email::Task {
+            to: user.email.clone(),
+            subject: subject,
+            body: body,
+        },
+    )?;
     Ok(())
 }

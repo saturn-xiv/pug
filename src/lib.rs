@@ -34,6 +34,7 @@ extern crate language_tags;
 extern crate lapin_futures as lapin;
 extern crate log4rs;
 extern crate md5;
+extern crate mime;
 extern crate mustache;
 extern crate nix;
 extern crate oping;
