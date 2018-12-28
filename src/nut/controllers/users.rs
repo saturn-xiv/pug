@@ -1,6 +1,7 @@
 use std::fmt;
 use std::net::SocketAddr;
 use std::ops::Deref;
+use std::sync::Arc;
 
 use chrono::{Duration, Utc};
 use diesel::{prelude::*, update};
@@ -67,7 +68,7 @@ pub struct SignIn {
 #[post("/sign-in", format = "json", data = "<form>")]
 pub fn sign_in(
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
     remote: SocketAddr,
     form: Json<SignIn>,
 ) -> Result<JsonValue> {
@@ -119,9 +120,9 @@ pub struct SignUp {
 #[post("/sign-up", format = "json", data = "<form>")]
 pub fn sign_up(
     form: Json<SignUp>,
-    queue: State<RabbitMQ>,
+    queue: State<Arc<RabbitMQ>>,
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
     remote: SocketAddr,
     host: Host,
     locale: Locale,
@@ -173,9 +174,9 @@ pub fn confirm(
     form: Json<Email>,
     host: Host,
     locale: Locale,
-    queue: State<RabbitMQ>,
+    queue: State<Arc<RabbitMQ>>,
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
     i18n: I18n,
 ) -> Result<JsonValue> {
     form.validate()?;
@@ -205,7 +206,7 @@ pub fn confirm_token(
     token: String,
     remote: SocketAddr,
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
 ) -> Result<JsonValue> {
     let token = jwt.parse::<Token>(&token)?.claims;
     if token.act != Action::Confirm {
@@ -228,10 +229,10 @@ pub fn unlock(
     form: Json<Email>,
     host: Host,
     locale: Locale,
-    queue: State<RabbitMQ>,
+    queue: State<Arc<RabbitMQ>>,
     i18n: I18n,
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
 ) -> Result<JsonValue> {
     form.validate()?;
     let db = db.deref();
@@ -259,7 +260,7 @@ pub fn unlock_token(
     token: String,
     remote: SocketAddr,
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
 ) -> Result<JsonValue> {
     let token = jwt.parse::<Token>(&token)?.claims;
     if token.act != Action::Unlock {
@@ -280,12 +281,12 @@ pub fn unlock_token(
 #[post("/forgot-password", format = "json", data = "<form>")]
 pub fn forgot_password(
     form: Json<Email>,
-    queue: State<RabbitMQ>,
+    queue: State<Arc<RabbitMQ>>,
     host: Host,
     locale: Locale,
     db: Database,
     i18n: I18n,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
 ) -> Result<JsonValue> {
     form.validate()?;
     let db = db.deref();
@@ -319,7 +320,7 @@ pub fn reset_password(
     form: Json<ResetPassword>,
     remote: SocketAddr,
     db: Database,
-    jwt: State<Jwt>,
+    jwt: State<Arc<Jwt>>,
 ) -> Result<JsonValue> {
     form.validate()?;
     let token = jwt.parse::<Token>(&form.token)?.claims;

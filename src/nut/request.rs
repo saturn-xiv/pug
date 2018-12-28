@@ -1,4 +1,5 @@
 use std::ops::Deref;
+use std::sync::Arc;
 
 use hyper::header::Header as HyperHeader;
 use rocket::{
@@ -153,7 +154,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for CurrentUser {
         let Token(token) = req.guard::<Token>()?;
         let Database(db) = req.guard::<Database>()?;
         let db = db.deref();
-        let jwt = req.guard::<State<Jwt>>()?;
+        let jwt = req.guard::<State<Arc<Jwt>>>()?;
         let jwt = jwt.deref();
 
         if let Ok(token) = jwt.parse::<controllers::users::Token>(&token) {
