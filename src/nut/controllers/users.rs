@@ -446,7 +446,8 @@ fn send_email(
         send_email::NAME.to_string(),
         Uuid::new_v4().to_string(),
         send_email::Task {
-            to: user.email.clone(),
+            email: user.email.clone(),
+            name: user.real_name.clone(),
             subject: subject,
             body: body,
         },

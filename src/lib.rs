@@ -32,6 +32,8 @@ extern crate hyper;
 extern crate jsonwebtoken;
 extern crate language_tags;
 extern crate lapin_futures as lapin;
+extern crate lettre;
+extern crate lettre_email;
 extern crate log4rs;
 extern crate md5;
 extern crate mime;

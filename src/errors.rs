@@ -39,6 +39,7 @@ error_chain! {
         RocketLaunch(rocket::error::LaunchError);
         Git2(git2::Error);
         MimeFormStr(mime::FromStrError);
+        LettreSmtp(lettre::smtp::error::Error);
     }
 }
 

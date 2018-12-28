@@ -58,6 +58,16 @@ ssh2 = "0.3"
 mime = "0.3"
 mustache = "*"
 
+[dependencies.native-tls]
+version = "*"
+features = ["vendored"]
+
+[dependencies.lettre]
+git = "https://github.com/lettre/lettre.git"
+
+[dependencies.lettre_email]
+git = "https://github.com/lettre/lettre.git"
+
 [dependencies.openssl-sys]
 version = "*"
 features = ["vendored"]
