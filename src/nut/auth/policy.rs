@@ -74,16 +74,15 @@ impl Dao for Connection {
             .collect::<_>())
     }
     fn can(&self, user: &ID, role: &Role, resource: &Option<String>) -> bool {
-        let role = format!("{}", role);
         let it = match resource {
             Some(_) => policies::dsl::policies
                 .filter(policies::dsl::user_id.eq(user))
-                .filter(policies::dsl::role.eq(&role))
+                .filter(policies::dsl::role.eq(&role.to_string()))
                 .filter(policies::dsl::resource.eq(resource))
                 .first::<Item>(self),
             None => policies::dsl::policies
                 .filter(policies::dsl::user_id.eq(user))
-                .filter(policies::dsl::role.eq(&role))
+                .filter(policies::dsl::role.eq(&role.to_string()))
                 .filter(policies::dsl::resource.is_null())
                 .first::<Item>(self),
         };
@@ -94,19 +93,18 @@ impl Dao for Connection {
     }
 
     fn deny(&self, user: &ID, role: &Role, resource: &Option<String>) -> Result<()> {
-        let role = format!("{}", role);
         match resource {
             Some(_) => delete(
                 policies::dsl::policies
                     .filter(policies::dsl::user_id.eq(user))
-                    .filter(policies::dsl::role.eq(&role))
+                    .filter(policies::dsl::role.eq(&role.to_string()))
                     .filter(policies::dsl::resource.eq(resource)),
             )
             .execute(self),
             None => delete(
                 policies::dsl::policies
                     .filter(policies::dsl::user_id.eq(user))
-                    .filter(policies::dsl::role.eq(&role))
+                    .filter(policies::dsl::role.eq(&role.to_string()))
                     .filter(policies::dsl::resource.is_null()),
             )
             .execute(self),
@@ -122,18 +120,17 @@ impl Dao for Connection {
         nbf: &NaiveDate,
         exp: &NaiveDate,
     ) -> Result<()> {
-        let role = format!("{}", role);
         let now = Utc::now().naive_utc();
 
         let it = match resource {
             Some(_) => policies::dsl::policies
                 .filter(policies::dsl::user_id.eq(user))
-                .filter(policies::dsl::role.eq(&role))
+                .filter(policies::dsl::role.eq(&role.to_string()))
                 .filter(policies::dsl::resource.eq(resource))
                 .first::<Item>(self),
             None => policies::dsl::policies
                 .filter(policies::dsl::user_id.eq(user))
-                .filter(policies::dsl::role.eq(&role))
+                .filter(policies::dsl::role.eq(&role.to_string()))
                 .filter(policies::dsl::resource.is_null())
                 .first::<Item>(self),
         };
@@ -153,7 +150,7 @@ impl Dao for Connection {
                 insert_into(policies::dsl::policies)
                     .values(&New {
                         user_id: user,
-                        role: &role,
+                        role: &role.to_string(),
                         resource: match resource {
                             Some(ref v) => Some(v),
                             None => None,

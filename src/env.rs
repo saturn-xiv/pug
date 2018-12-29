@@ -29,7 +29,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            env: format!("{}", Environment::Development),
+            env: Environment::Development.to_string(),
             http: Http::default(),
             secrets: base64::encode(&crypto::sodium::Encryptor::random(32)),
             redis: Some("redis://localhost:5432/0".to_string()),

@@ -147,7 +147,6 @@ impl Dao for Connection {
 
     fn sign_in(&self, id: &ID, ip: &IpAddr) -> Result<()> {
         let now = Utc::now().naive_utc();
-        let ip = format!("{}", ip);
         let it = users::dsl::users.filter(users::dsl::id.eq(id));
         let (current_sign_in_at, current_sign_in_ip, sign_in_count) = users::dsl::users
             .select((
@@ -160,7 +159,7 @@ impl Dao for Connection {
         update(it)
             .set((
                 users::dsl::current_sign_in_at.eq(&now),
-                users::dsl::current_sign_in_ip.eq(ip),
+                users::dsl::current_sign_in_ip.eq(&ip.to_string()),
                 users::dsl::last_sign_in_at.eq(&current_sign_in_at),
                 users::dsl::last_sign_in_ip.eq(&current_sign_in_ip),
                 users::dsl::sign_in_count.eq(&(sign_in_count + 1)),
@@ -183,7 +182,7 @@ impl Dao for Connection {
                 nick_name: nick_name,
                 email: &email,
                 password: Some(&T::sum(password.as_bytes())?),
-                provider_type: &format!("{}", Type::Email),
+                provider_type: &Type::Email.to_string(),
                 provider_id: &email,
                 logo: &format!(
                     "https://www.gravatar.com/avatar/{}.jpg",

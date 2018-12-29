@@ -33,11 +33,10 @@ pub trait Dao {
 
 impl Dao for Connection {
     fn add<S: Into<String>>(&self, user: &ID, ip: &IpAddr, message: S) -> Result<()> {
-        let ip = format!("{}", ip);
         insert_into(logs::dsl::logs)
             .values(&New {
                 user_id: user,
-                ip: &ip,
+                ip: &ip.to_string(),
                 message: &message.into(),
             })
             .execute(self)?;

@@ -107,7 +107,7 @@ impl Queue for RabbitMQ {
                                         BasicPublishOptions::default(),
                                         BasicProperties::default()
                                             .with_message_id(mid)
-                                            .with_content_type(format!("{}", APPLICATION_JSON))
+                                            .with_content_type(APPLICATION_JSON.to_string())
                                             .with_timestamp(
                                                 SystemTime::now()
                                                     .duration_since(UNIX_EPOCH)
