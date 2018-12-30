@@ -32,7 +32,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            host: "localhost".to_string(),
+            host: "127.0.0.1".to_string(),
             port: 5672,
             username: "guest".to_string(),
             password: "guest".to_string(),
