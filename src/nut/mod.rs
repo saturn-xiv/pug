@@ -6,7 +6,12 @@ pub mod seo;
 pub mod site;
 pub mod tasks;
 
+use std::fmt;
+use std::str::FromStr;
+
 use rocket::Route;
+
+use super::errors::{Error, Result};
 
 lazy_static! {
     pub static ref ROUTES: Vec<(&'static str, Vec<Route>)> = {
@@ -40,4 +45,33 @@ lazy_static! {
         ));
         items
     };
+}
+
+pub enum MediaType {
+    TEXT,
+    HTML,
+    MARKDOWN,
+}
+
+impl fmt::Display for MediaType {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            MediaType::TEXT => write!(fmt, "text"),
+            MediaType::HTML => write!(fmt, "html"),
+            MediaType::MARKDOWN => write!(fmt, "markdown"),
+        }
+    }
+}
+
+impl FromStr for MediaType {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "text" => Ok(MediaType::TEXT),
+            "markdown" => Ok(MediaType::MARKDOWN),
+            "html" => Ok(MediaType::HTML),
+            t => Err(format!("unknown media type {}", t).into()),
+        }
+    }
 }
