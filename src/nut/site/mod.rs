@@ -5,6 +5,8 @@ mod postgresql;
 #[cfg(feature = "sqlite")]
 mod sqlite;
 
+pub mod models;
+
 #[cfg(feature = "mysql")]
 pub use self::mysql::*;
 #[cfg(feature = "postgresql")]

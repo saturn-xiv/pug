@@ -134,6 +134,9 @@ pub struct CurrentUser {
 }
 
 impl CurrentUser {
+    pub fn is_admin(&self) -> bool {
+        self.is(&Role::Admin)
+    }
     pub fn is(&self, role: &Role) -> bool {
         self.can(role, &None)
     }

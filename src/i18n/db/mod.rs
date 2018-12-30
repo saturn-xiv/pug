@@ -6,7 +6,7 @@ mod postgresql;
 mod sqlite;
 
 use chrono::{NaiveDateTime, Utc};
-use diesel::{insert_into, prelude::*, update};
+use diesel::{delete, insert_into, prelude::*, update};
 
 #[cfg(feature = "mysql")]
 pub use self::mysql::*;
@@ -56,6 +56,7 @@ pub trait Dao {
     fn all(&self, lang: &String) -> Result<Vec<Item>>;
     fn get(&self, lang: &String, code: &String) -> Result<String>;
     fn set(&self, lang: &String, code: &String, message: &String) -> Result<()>;
+    fn delete(&self, id: &ID) -> Result<()>;
 }
 
 impl Dao for Connection {
@@ -116,6 +117,10 @@ impl Dao for Connection {
                     .execute(self)?;
             }
         }
+        Ok(())
+    }
+    fn delete(&self, id: &ID) -> Result<()> {
+        delete(locales::dsl::locales.filter(locales::dsl::id.eq(id))).execute(self)?;
         Ok(())
     }
 }

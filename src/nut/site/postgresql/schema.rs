@@ -47,7 +47,6 @@ table! {
         body -> Text,
         media_type -> Varchar,
         created_at -> Timestamp,
-        updated_at -> Timestamp,
     }
 }
 

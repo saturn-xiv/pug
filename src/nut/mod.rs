@@ -35,6 +35,22 @@ lazy_static! {
             ],
         ));
         items.push((
+            "/api/locales",
+            routes![
+                controllers::locales::index,
+                controllers::locales::save,
+                controllers::locales::destory,
+            ],
+        ));
+        items.push((
+            "/api/leave-words",
+            routes![
+                controllers::leave_words::index,
+                controllers::leave_words::create,
+                controllers::leave_words::destory,
+            ],
+        ));
+        items.push((
             "/",
             routes![
                 seo::robots::txt,
